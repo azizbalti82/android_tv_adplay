@@ -1,0 +1,10 @@
+<resources>
+    <!-- Light Mode Colors -->
+    <color name="primary">#007BFF</color> <!-- Primary Blue -->
+    <color name="secondary">#00BCD4</color> <!-- Secondary Cyan -->
+    <color name="background">#FFFFFF</color> <!-- White Background -->
+    <color name="colorError">#D32F2F</color> <!-- Error Color -->
+    <color name="textPrimary">#212121</color> <!-- Text Color Primary -->
+    <color name="textSecondary">#757575</color> <!-- Text Color Secondary -->
+    <color name="textOnPrimary">#FFFFFF</color> <!-- White Text on Primary Blue -->
+</resources>
