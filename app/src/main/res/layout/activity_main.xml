@@ -1,118 +1,118 @@
-<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main_browse_fragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:gravity="center"
     android:background="@color/background"
     tools:context=".MainActivity"
     tools:deviceIds="tv"
     tools:ignore="MergeRootFrame">
 
-    <!-- home screen -->
+    <!-- Loading Indicator -->
+    <ProgressBar
+        android:visibility="gone"
+        android:id="@+id/loading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:indeterminate="true"
+        android:indeterminateTint="@color/textPrimary" />
+
+    <!-- Home Screen -->
     <LinearLayout
         android:id="@+id/container_home"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
         android:gravity="center"
-        android:visibility="gone"
-        >
-        <!-- Loading Indicator -->
+        android:orientation="vertical"
+        android:visibility="gone">
+
         <ProgressBar
             android:id="@+id/loading_indicator"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="25dp"
             android:indeterminate="true"
-            android:indeterminateTint="@color/textPrimary"
-            android:layout_marginBottom="25dp" />
-        <!-- Loading Text -->
+            android:indeterminateTint="@color/textPrimary" />
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:gravity="center"
             android:text="Loading ads, please wait..."
             android:textColor="@color/textPrimary"
             android:textSize="18sp"
-            android:textStyle="bold"
-            android:gravity="center" />
+            android:textStyle="bold" />
     </LinearLayout>
 
-    <!-- connect screen -->
+    <!-- Connect Screen -->
     <LinearLayout
         android:id="@+id/container_connect"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
         android:gravity="center"
-        android:visibility="gone"
-        >
-        <!-- Loading Indicator -->
-        <ProgressBar
-            android:id="@+id/loading_indicator_connect"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:indeterminate="true"
-            android:indeterminateTint="@color/textPrimary"
-            android:layout_marginBottom="25dp" />
-        <!-- Loading Text -->
+            android:text="Go to dashboard and add this device with the code below"
+            android:textColor="@color/textPrimary"
+            android:textSize="18sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="5F1GG236E"
+            android:textColor="@color/textSecondary"
+            android:layout_marginTop="20dp"
+            android:textSize="30sp" />
     </LinearLayout>
 
-    <!-- offline screen -->
+    <!-- Offline Screen -->
     <LinearLayout
-        android:id="@+id/container_offline"
+        android:id="@+id/offline_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical"
         android:gravity="center"
-        >
-        <LinearLayout
-            android:id="@+id/offline_container"
-            android:layout_width="match_parent"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <ImageView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_margin="30dp"
+            android:src="@drawable/offline"
+            android:tint="@color/textSecondary" />
+
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:orientation="vertical"
-            >
+            android:text="You are offline"
+            android:textColor="@color/textSecondary"
+            android:textSize="16sp" />
 
-            <ImageView
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_margin="30dp"
-                android:src="@drawable/offline"
-                android:tint="@color/textSecondary" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:text="Please check your connection"
+            android:textColor="@color/textSecondary"
+            android:textSize="16sp" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="You are offline"
-                android:textColor="@color/textSecondary"
-                android:textSize="16sp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                android:text="Please check your connection"
-                android:textColor="@color/textSecondary"
-                android:textSize="16sp" />
-
-            <Button
-                android:id="@+id/try_again"
-                android:layout_width="wrap_content"
-                android:layout_height="40dp"
-                android:layout_marginTop="30dp"
-                android:background="@drawable/button_filled_black"
-                android:text="Try again"
-                android:textAlignment="center"
-                android:textColor="@color/background"
-                android:padding="10dp"
-                android:textSize="15sp"
-                android:backgroundTint="@null" />
-
-
-        </LinearLayout>
+        <Button
+            android:id="@+id/try_again"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:layout_marginTop="30dp"
+            android:background="@drawable/button_filled_black"
+            android:backgroundTint="@null"
+            android:padding="10dp"
+            android:text="Try again"
+            android:textAlignment="center"
+            android:textColor="@color/background"
+            android:textSize="15sp" />
     </LinearLayout>
-
-</LinearLayout>
+</FrameLayout>
