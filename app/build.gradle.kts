@@ -41,4 +41,11 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.leanback)
     implementation(libs.glide)
+
+    //websocket
+    implementation(libs.java.websocket)
+
+    //retrofit for api calls
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
 }

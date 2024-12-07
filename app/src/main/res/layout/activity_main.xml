@@ -26,7 +26,7 @@
         android:layout_height="match_parent"
         android:gravity="center"
         android:orientation="vertical"
-        android:visibility="gone">
+        >
 
         <ProgressBar
             android:id="@+id/loading_indicator"
@@ -34,16 +34,29 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="25dp"
             android:indeterminate="true"
-            android:indeterminateTint="@color/textPrimary" />
+            android:indeterminateTint="@color/textPrimary"
+            android:visibility="gone"
+            />
 
         <TextView
+            android:id="@+id/loading_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
             android:text="Loading ads, please wait..."
             android:textColor="@color/textPrimary"
             android:textSize="18sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:visibility="gone"
+            />
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="fitXY"
+            android:src="@drawable/id_demo" />
+
+
     </LinearLayout>
 
     <!-- Connect Screen -->
@@ -59,15 +72,17 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Go to dashboard and add this device with the code below"
+            android:textAlignment="center"
             android:textColor="@color/textPrimary"
             android:textSize="18sp" />
 
         <TextView
+            android:id="@+id/code_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="5F1GG236E"
+            android:text=""
             android:textColor="@color/textSecondary"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="30dp"
             android:textSize="30sp" />
     </LinearLayout>
 
