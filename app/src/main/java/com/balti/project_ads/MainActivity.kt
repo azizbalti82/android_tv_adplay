@@ -1,8 +1,6 @@
 package com.balti.project_ads
 
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.widget.Toast
@@ -22,6 +20,12 @@ class MainActivity : FragmentActivity() {
         // Prevent the app from closing
         Log.d("MainActivity", "Back button pressed. Action prevented.")
         // Optionally, you can show a toast or a confirmation dialog here
+    }
+
+    override fun onPause() {
+        super.onPause()
+        //update connectivity status
+        set_connectivity(false)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,6 +56,7 @@ class MainActivity : FragmentActivity() {
 
 
 
+
         // Logic for device connection
         apiCalls = ApiCalls()
         deviceId = shared.get_id(this)
@@ -60,6 +65,10 @@ class MainActivity : FragmentActivity() {
         show_loading()
         apiCalls.isDeviceConnected(deviceId) { connected ->
             if (connected) {
+                //update connectivity status
+                set_connectivity(true)
+
+
                 //if device added to server
                 show_home_section()
 
@@ -78,12 +87,13 @@ class MainActivity : FragmentActivity() {
                 //start the scheduling of the ads with WorkManager
 
 
-            } else {
+            }
+            else {
                 //device not added to server
                 //check if there is a temp device in android
                 if(deviceId!=""){
                     //there is a temp device, check if its still valid in server
-                    get_device()
+                    get_device_temp()
                 }else{
                     //if its not valid (expired or deleted): generate a new temp device
                     create_device()
@@ -106,8 +116,8 @@ class MainActivity : FragmentActivity() {
             }
         }
     }
-    fun get_device() {
-        apiCalls.getDevice(deviceId) { message,device ->
+    fun get_device_temp() {
+        apiCalls.getDeviceTemp(deviceId) { message, device ->
             if (device != null) {
                 // Device exist in the server
                 show_connect_section(deviceId)
@@ -116,6 +126,28 @@ class MainActivity : FragmentActivity() {
                 create_device()
                 // Handle error message
                 Log.e("API_ERROR", message)
+            }
+        }
+    }
+
+    private fun set_connectivity(connected: Boolean) {
+        apiCalls.getDevice(deviceId) { device ->
+            if (device != null) {
+                Log.d("error_", device.name)
+                if(connected){
+                    device.status = "online"
+
+                }else{
+                    device.status = "offline"
+                }
+
+                //update device in server
+                apiCalls.updateDevice(device.id,device) { message, device ->
+                    if (device == null) {
+                        // Device update successful
+                        Log.d("error", message)
+                    }
+                }
             }
         }
     }
