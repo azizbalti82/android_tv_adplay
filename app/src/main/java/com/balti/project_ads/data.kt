@@ -15,13 +15,22 @@ class data {
     companion object{
         val url = "http://192.168.1.122:3000"
         lateinit var bindHome: ActivityMainBinding
+        lateinit var player: ExoPlayer
 
         fun showMedia(context: Context, mediaType: String, uri: Uri?) {
+            // Stop and release the player if it already exists
+            if (::player.isInitialized) {
+                player.stop()
+                player.release()
+            }
+            //reinitialize the Player
+            player = ExoPlayer.Builder(context).build()
             //first hide all media views
             bindHome.mediaAudio.cancelAnimation()
             bindHome.mediaImage.visibility = View.GONE
             bindHome.mediaAudio.visibility = View.GONE
             bindHome.mediaVideo.visibility = View.GONE
+            bindHome.noMedia.visibility = View.GONE
 
             when (mediaType.lowercase()) {
                 "image" -> {
@@ -36,8 +45,6 @@ class data {
                     //show the exoplayer view
                     bindHome.mediaVideo.visibility = View.VISIBLE
                     // Play audio using ExoPlayer
-
-                    val player = ExoPlayer.Builder(context).build()
                     bindHome.mediaVideo.player = player
 
                     // Disable controls (ensure that 'useController' is false)
@@ -59,7 +66,6 @@ class data {
                     bindHome.mediaAudio.visibility = View.VISIBLE
                     bindHome.mediaAudio.playAnimation()
                     // Play audio using ExoPlayer
-                    val player = ExoPlayer.Builder(context).build()
                     val mediaItem = uri?.let { MediaItem.fromUri(it) }
 
                     if (mediaItem != null) {
@@ -69,7 +75,6 @@ class data {
                         player.prepare()
                         player.play()
                     }
-
                 }
                 else -> {
                     //show empty page

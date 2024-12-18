@@ -1,3 +1,4 @@
+import com.balti.project_ads.backend.models.Ad
 import com.balti.project_ads.backend.models.CreateDeviceResponse
 import com.balti.project_ads.backend.models.Device
 import com.balti.project_ads.backend.models.DeviceTemp
@@ -30,7 +31,11 @@ interface ApiInterface {
         @Body device: Device
     ): Call<Device>
 
-
+    //get all schedules for a specific device
     @GET("schedules/search/device/{deviceId}")
     fun getSchedulesByDeviceId(@Path("deviceId") deviceId: String?): Call<List<Schedule?>?>?
+
+    // get one ad by its id
+    @GET("/ads/{adId}")
+    fun getAd(@Path("adId") adId: String): Call<Ad>
 }

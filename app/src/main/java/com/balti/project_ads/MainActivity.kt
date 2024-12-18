@@ -186,6 +186,9 @@ class MainActivity : FragmentActivity() {
         }
     }
     fun get_schdules(deviceId: String) {
+        //first thing : show there is no ads for this moment
+        data.showMedia(this, "",null)
+        //now schedule ads (if they exist)
         apiCalls.getSchedulesByDeviceId(deviceId) { schedules ->
             if (schedules != null) {
                 // we got schedules
@@ -198,9 +201,14 @@ class MainActivity : FragmentActivity() {
                     for(s in schedules){
                         //get the media type from the ad
                         if(s!=null){
-                            //get ad info (because we need the mediaType of that ad)
-
-                            scheduleAd(s.ad_id!!,"image",s.start!!,s.end!!)
+                            apiCalls.getMediaTypeFromAd(s.ad_id!!) { type ->
+                                if (type != null) {
+                                    scheduleAd(s.ad_id!!,type,s.start!!,s.end!!)
+                                } else {
+                                    // there is no schedules
+                                    Toast.makeText(this, "Error while loading ad type", Toast.LENGTH_SHORT).show()
+                                }
+                            }
                         }
                     }
 
@@ -264,12 +272,12 @@ class MainActivity : FragmentActivity() {
     private fun scheduleAd(adId: String,mediaType:String, startTime: Date, endTime: Date) {
         // Calculate delay in milliseconds
         val currentTime = System.currentTimeMillis()
-        Log.d("ActionWorker", "Scheduled for: ${startTime.time}")
-        Log.d("ActionWorker", "Current time: ${currentTime}")
+        Log.d("ActionWorker", "ad type: ${mediaType}")
 
-        val still_valid = (endTime.time - currentTime) > 0
-        val delay_to_start: Long = startTime.time - currentTime
-        val delay_to_end: Long = endTime.time - currentTime
+        val delay_to_start: Long = (startTime.time+3600000L) - currentTime
+        val delay_to_end: Long = (endTime.time+3600000L) - currentTime
+
+        val still_valid = delay_to_end > 0
 
         // Check if the delay is positive (i.e., scheduled time is in the future)
         if (still_valid) {

@@ -71,13 +71,13 @@
             >
 
             <ImageView
-                android:layout_width="150dp"
-                android:layout_height="150dp"
-                android:layout_margin="30dp"
-                android:src="@drawable/empty"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:src="@drawable/advertising"
                 app:tint="@color/textSecondary" />
 
             <TextView
+                android:layout_marginTop="25dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="There is no Ads at this moment"

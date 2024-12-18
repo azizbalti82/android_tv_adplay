@@ -36,3 +36,19 @@ class Schedule {
     var status: String? = null
 }
 
+data class Ad(
+    val ad: ad_content
+)
+data class ad_content(
+    val _id: String? = null,  // Corresponds to "ad._id"
+    val id: String? = null,   // Corresponds to "ad.id"
+    val title: String? = null,  // Corresponds to "ad.title"
+    val description: String? = null,  // Corresponds to "ad.description"
+    val type: String? = null,  // Corresponds to "ad.type"
+    val mediaUrl: String? = null,  // Corresponds to "ad.mediaUrl"
+    val mediaExtension: String? = null,  // Corresponds to "ad.mediaExtension"
+    val createdAt: String? = null,  // Corresponds to "ad.createdAt"
+    val updatedAt: String? = null,  // Corresponds to "ad.updatedAt"
+    val v: Int? = null  // Corresponds to "ad.__v"
+)
+

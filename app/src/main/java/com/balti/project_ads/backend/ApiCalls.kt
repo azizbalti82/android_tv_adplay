@@ -2,6 +2,7 @@ package com.balti.project_ads.backend
 
 import ApiInterface
 import android.util.Log
+import com.balti.project_ads.backend.models.Ad
 import com.balti.project_ads.backend.models.CreateDeviceResponse
 import com.balti.project_ads.backend.models.Device
 import com.balti.project_ads.backend.models.DeviceTemp
@@ -151,6 +152,26 @@ class ApiCalls {
 
             override fun onFailure(call: Call<List<Schedule?>?>, t: Throwable) {
                 Log.e(TAG, "error in getting schedules" + t.message.toString())
+                callback(null)
+            }
+        })
+    }
+
+    // crud for ads
+    fun getMediaTypeFromAd(adId: String, callback: (String?) -> Any) {
+        Api.getAd(adId)?.enqueue(object : Callback<Ad> {
+            override fun onResponse(p0: Call<Ad>, p1: Response<Ad>) {
+                if (p1.isSuccessful) {
+                    val ad = p1.body()
+                    // Handle the schedules, update UI, etc.
+                    callback(ad?.ad?.type)
+                } else {
+                    Log.e(TAG, "error in getting ad type" + p1.message())
+                    callback(null)
+                }
+            }
+            override fun onFailure(p0: Call<Ad>, p1: Throwable) {
+                Log.e(TAG, "error in getting ad type" + p1.message)
                 callback(null)
             }
         })
