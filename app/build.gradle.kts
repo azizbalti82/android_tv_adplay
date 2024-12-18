@@ -56,6 +56,10 @@ dependencies {
     implementation(libs.lottie)
     implementation(libs.androidx.appcompat)
 
+    //to schedule tasks
+    implementation(libs.androidx.work.runtime.ktx)
+
+
 
 
 

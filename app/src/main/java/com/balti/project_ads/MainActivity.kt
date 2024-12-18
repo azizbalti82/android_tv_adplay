@@ -1,5 +1,6 @@
 package com.balti.project_ads
 
+
 import android.content.Context
 import android.net.Uri
 import android.os.Bundle
@@ -7,6 +8,9 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.FragmentActivity
+import androidx.work.Data
+import androidx.work.OneTimeWorkRequest
+import androidx.work.WorkManager
 import com.balti.project_ads.backend.ApiCalls
 import com.balti.project_ads.backend.shared
 import com.balti.project_ads.databinding.ActivityMainBinding
@@ -14,6 +18,9 @@ import com.bumptech.glide.Glide
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
+import java.util.Calendar
+import java.util.Date
+import java.util.concurrent.TimeUnit
 
 class MainActivity : FragmentActivity() {
     private lateinit var bindHome: ActivityMainBinding
@@ -38,6 +45,8 @@ class MainActivity : FragmentActivity() {
         bindHome = ActivityMainBinding.inflate(layoutInflater)
         setContentView(bindHome.root)
 
+        //save bindhome
+        data.bindHome = bindHome
 
         //listeners
         bindHome.refrech.setOnClickListener {
@@ -176,85 +185,26 @@ class MainActivity : FragmentActivity() {
             }
         }
     }
-    fun showMedia(context: Context, mediaType: String, uri: Uri?) {
-        //first hide all media views
-        bindHome.mediaAudio.cancelAnimation()
-        bindHome.mediaImage.visibility = View.GONE
-        bindHome.mediaAudio.visibility = View.GONE
-        bindHome.mediaVideo.visibility = View.GONE
-
-        when (mediaType.lowercase()) {
-            "image" -> {
-                bindHome.mediaImage.visibility = View.VISIBLE
-                // Show image
-                Glide.with(context)
-                    .load(uri) // URI of the image
-                    .into(bindHome.mediaImage)
-
-            }
-            "video" -> {
-                //show the exoplayer view
-                bindHome.mediaVideo.visibility = View.VISIBLE
-                // Play audio using ExoPlayer
-
-                val player = ExoPlayer.Builder(context).build()
-                bindHome.mediaVideo.player = player
-
-                // Disable controls (ensure that 'useController' is false)
-                bindHome.mediaVideo.useController = false
-
-                val mediaItem = uri?.let { MediaItem.fromUri(it) }
-                if (mediaItem != null) {
-                    player.setMediaItem(mediaItem)
-                }
-
-                // Set repeat mode (repeat the media)
-                player.repeatMode = Player.REPEAT_MODE_ONE
-                player.prepare()
-                player.play()
-
-            }
-            "music" -> {
-                //show the exoplayer view
-                bindHome.mediaAudio.visibility = View.VISIBLE
-                bindHome.mediaAudio.playAnimation()
-                // Play audio using ExoPlayer
-                val player = ExoPlayer.Builder(context).build()
-                val mediaItem = uri?.let { MediaItem.fromUri(it) }
-
-                if (mediaItem != null) {
-                    player.setMediaItem(mediaItem)
-                    player.repeatMode = Player.REPEAT_MODE_ONE
-                    bindHome.mediaVideo.useController = false
-                    player.prepare()
-                    player.play()
-                }
-
-            }
-            else -> {
-                //show empty page
-                bindHome.noMedia.visibility = View.VISIBLE
-            }
-        }
-    }
     fun get_schdules(deviceId: String) {
         apiCalls.getSchedulesByDeviceId(deviceId) { schedules ->
             if (schedules != null) {
                 // we got schedules
                 if(schedules.isEmpty()){
                     //see if there are new ads
-                    showMedia(this, "",null)
+                    data.showMedia(this, "",null)
                 }else{
                     //there are some schedules:
-                    //1) get their ads
+                    //1) schedule them
+                    for(s in schedules){
+                        //get the media type from the ad
+                        if(s!=null){
+                            //get ad info (because we need the mediaType of that ad)
+
+                            scheduleAd(s.ad_id!!,"image",s.start!!,s.end!!)
+                        }
+                    }
 
                     //2) save ads in the storage for offline consulting (if the ads not already saved)
-
-
-                    //testttt
-                    val urlstring = "http://192.168.1.122:3000/ads/media/904205"
-                    val uri = Uri.parse(urlstring)
-                    showMedia(this, "image", uri)
                 }
             } else {
                 // there is no schedules
@@ -309,6 +259,47 @@ class MainActivity : FragmentActivity() {
         bindHome.offlineContainer.visibility = View.GONE
         bindHome.containerHome.visibility = View.GONE
     }
+
+    // functionality ---------------------------------------------
+    private fun scheduleAd(adId: String,mediaType:String, startTime: Date, endTime: Date) {
+        // Calculate delay in milliseconds
+        val currentTime = System.currentTimeMillis()
+        Log.d("ActionWorker", "Scheduled for: ${startTime.time}")
+        Log.d("ActionWorker", "Current time: ${currentTime}")
+
+        val still_valid = (endTime.time - currentTime) > 0
+        val delay_to_start: Long = startTime.time - currentTime
+        val delay_to_end: Long = endTime.time - currentTime
+
+        // Check if the delay is positive (i.e., scheduled time is in the future)
+        if (still_valid) {
+            //save when the ad will start
+            add_to_worked(adId,mediaType,delay_to_start)
+            //save when the ad will end
+            add_to_worked(adId,"",delay_to_end)
+        } else {
+            // If the scheduled time has already passed, do nothing
+            Log.d("ActionWorker", "Scheduled time has already passed. Action not scheduled.")
+        }
+    }
+    fun add_to_worked(adId: String,mediaType_:String,delay:Long){
+        // Prepare input data for the Worker
+        val inputData: Data = Data.Builder()
+            .putString("id", adId)
+            .putString("mediaType", mediaType_)
+            .build()
+
+        // Create a OneTimeWorkRequest with a delay
+        val workRequest: OneTimeWorkRequest = OneTimeWorkRequest.Builder(ActionWorker::class.java)
+            .setInitialDelay(delay, TimeUnit.MILLISECONDS)
+            .setInputData(inputData)
+            .build()
+
+        // Schedule the work
+        WorkManager.getInstance(this).enqueue(workRequest)
+        Log.d("ActionWorker", "Work scheduled successfully.")
+    }
+
 }
 
 

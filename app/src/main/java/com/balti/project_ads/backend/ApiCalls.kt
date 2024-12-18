@@ -6,6 +6,7 @@ import com.balti.project_ads.backend.models.CreateDeviceResponse
 import com.balti.project_ads.backend.models.Device
 import com.balti.project_ads.backend.models.DeviceTemp
 import com.balti.project_ads.backend.models.Schedule
+import com.balti.project_ads.data
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -15,7 +16,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 class ApiCalls {
     val TAG = "error_server"
-    private val baseUrl = "http://192.168.1.122:3000/"
+    private val baseUrl = data.url
 
     // Initialize Retrofit
     private val retrofit = Retrofit.Builder()
