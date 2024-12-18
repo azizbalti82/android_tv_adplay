@@ -1,12 +1,14 @@
 import com.balti.project_ads.backend.models.CreateDeviceResponse
 import com.balti.project_ads.backend.models.Device
 import com.balti.project_ads.backend.models.DeviceTemp
+import com.balti.project_ads.backend.models.Schedule
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
+
 
 interface ApiInterface {
     // Endpoint to create a device
@@ -27,4 +29,8 @@ interface ApiInterface {
         @Path("deviceId") deviceId: String,
         @Body device: Device
     ): Call<Device>
+
+
+    @GET("schedules/search/device/{deviceId}")
+    fun getSchedulesByDeviceId(@Path("deviceId") deviceId: String?): Call<List<Schedule?>?>?
 }

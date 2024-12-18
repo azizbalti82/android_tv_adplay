@@ -39,6 +39,11 @@ class MainActivity : FragmentActivity() {
         setContentView(bindHome.root)
 
 
+        //listeners
+        bindHome.refrech.setOnClickListener {
+            get_schdules(deviceId)
+        }
+
 //        val root: View = bindHome.root
 //        // Get screen dimensions
 //        val displayMetrics = resources.displayMetrics
@@ -58,48 +63,21 @@ class MainActivity : FragmentActivity() {
 //        root.requestLayout()
 
 
-
-
-
-
         // Logic for device connection
         apiCalls = ApiCalls()
         deviceId = shared.get_id(this)
 
+        //start the app
+        setupApp()
+    }
+
+
+    private fun setupApp(){
         //start loading animation
         show_loading()
         apiCalls.isDeviceConnected(deviceId) { connected ->
             if (connected /*replace true with 'connected'*/) {
-                //update connectivity status
-                set_connectivity(true)
-
-
-                //if device added to server
-                show_home_section()
-
-                //tell server that i'm online
-
-
-                //get schedule of this device
-
-
-                //see if there are new ads
-
-
-                //if there are new ads, download their media
-
-
-                //start the scheduling of the ads with WorkManager
-
-
-
-
-                val urlImageString = "https://pics.craiyon.com/2023-09-28/84df15a1a9ca4520b32c3631d097ecd2.webp"
-                val urlAudioString = "https://www.sousound.com/music/healing/healing_01.mp3"
-                val urlVideoString = "https://tekeye.uk/html/images/Joren_Falls_Izu_Jap.mp4"
-                val uri = Uri.parse(urlAudioString)
-
-                showMedia(this, "music", uri)
+                setupHome()
             }
             else {
                 //device not added to server
@@ -115,6 +93,34 @@ class MainActivity : FragmentActivity() {
             }
         }
     }
+    private fun setupHome() {
+        //update connectivity status to online
+        set_connectivity(true)
+
+        //if device added to server
+        show_home_section()
+
+
+        //get schedule of this device
+        get_schdules(deviceId)
+
+
+
+        //if there are new ads, download their media
+
+
+        //start the scheduling of the ads with WorkManager
+
+
+
+
+//        val urlImageString = "https://pics.craiyon.com/2023-09-28/84df15a1a9ca4520b32c3631d097ecd2.webp"
+//        val urlAudioString = "https://www.sousound.com/music/healing/healing_01.mp3"
+//        val urlVideoString = "https://tekeye.uk/html/images/Joren_Falls_Izu_Jap.mp4"
+//        val uri = Uri.parse(urlAudioString)
+//
+          //showMedia(this, "music", uri)
+    }
 
     //api functions ---------------------------------------------
     fun create_device() {
@@ -124,6 +130,7 @@ class MainActivity : FragmentActivity() {
             if (device != null) {
                 // Device céreation successful
                 shared.save_id(this, device.id)
+                deviceId = device.id
                 show_connect_section(device.id)
             } else {
                 // Handle error message
@@ -133,7 +140,7 @@ class MainActivity : FragmentActivity() {
         }
     }
     fun get_device_temp() {
-        apiCalls.getDeviceTemp(deviceId) { message, device ->
+        apiCalls.getTempDevice(deviceId) { message, device ->
             if (device != null) {
                 // Device exist in the server
                 show_connect_section(deviceId)
@@ -147,8 +154,9 @@ class MainActivity : FragmentActivity() {
     }
     fun set_connectivity(connected: Boolean) {
         apiCalls.getDevice(deviceId) { device ->
+            //Toast.makeText(this, device.toString(), Toast.LENGTH_SHORT).show()
             if (device != null) {
-                Log.d("error_", device.name)
+                device.name?.let { Log.d("error_", it) }
                 if(connected){
                     device.status = "online"
 
@@ -157,10 +165,12 @@ class MainActivity : FragmentActivity() {
                 }
 
                 //update device in server
-                apiCalls.updateDevice(device.id,device) { message, device ->
-                    if (device == null) {
-                        // Device update successful
-                        Log.d("error", message)
+                device.id?.let {
+                    apiCalls.updateDevice(it,device) { message, device ->
+                        if (device == null) {
+                            // Device update successful
+                            Log.d("error", message)
+                        }
                     }
                 }
             }
@@ -227,6 +237,32 @@ class MainActivity : FragmentActivity() {
             }
         }
     }
+    fun get_schdules(deviceId: String) {
+        apiCalls.getSchedulesByDeviceId(deviceId) { schedules ->
+            if (schedules != null) {
+                // we got schedules
+                if(schedules.isEmpty()){
+                    //see if there are new ads
+                    showMedia(this, "",null)
+                }else{
+                    //there are some schedules:
+                    //1) get their ads
+
+                    //2) save ads in the storage for offline consulting (if the ads not already saved)
+
+
+                    //testttt
+                    val urlstring = "http://192.168.1.122:3000/ads/media/904205"
+                    val uri = Uri.parse(urlstring)
+                    showMedia(this, "image", uri)
+                }
+            } else {
+                // there is no schedules
+                Toast.makeText(this, "Error while loading schedules", Toast.LENGTH_SHORT).show()
+
+            }
+        }
+    }
 
 
     //ui functions ----------------------------------------------
@@ -238,8 +274,14 @@ class MainActivity : FragmentActivity() {
 
         bindHome.tryAgain.setOnClickListener {
             show_loading()
-            if(message=="create_temp_device"){
-                create_device()
+            apiCalls.isDeviceConnected(deviceId) { connected ->
+                if (connected) {
+                    setupHome()
+                } else {
+                    if(message=="create_temp_device"){
+                        create_device()
+                    }
+                }
             }
         }
     }
@@ -249,6 +291,11 @@ class MainActivity : FragmentActivity() {
         bindHome.containerConnect.visibility = View.VISIBLE
         bindHome.offlineContainer.visibility = View.GONE
         bindHome.containerHome.visibility = View.GONE
+
+        bindHome.continueBtn.setOnClickListener {
+            bindHome.containerConnect.visibility = View.GONE
+            setupApp()
+        }
     }
     fun show_home_section(){
         bindHome.loading.visibility = View.GONE

@@ -5,11 +5,13 @@ import android.util.Log
 import com.balti.project_ads.backend.models.CreateDeviceResponse
 import com.balti.project_ads.backend.models.Device
 import com.balti.project_ads.backend.models.DeviceTemp
+import com.balti.project_ads.backend.models.Schedule
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+
 
 class ApiCalls {
     val TAG = "error_server"
@@ -18,7 +20,7 @@ class ApiCalls {
     // Initialize Retrofit
     private val retrofit = Retrofit.Builder()
         .baseUrl(baseUrl)
-        .addConverterFactory(GsonConverterFactory.create())
+        .addConverterFactory(GsonConverterFactory.create(provideGson()))
         .build()
 
     private val Api = retrofit.create(ApiInterface::class.java)
@@ -49,7 +51,7 @@ class ApiCalls {
             }
         })
     }
-    fun getDeviceTemp(deviceId: String, callback: (String, DeviceTemp?) -> Unit) {
+    fun getTempDevice(deviceId: String, callback: (String, DeviceTemp?) -> Unit) {
         val call = Api.getDeviceTemp(deviceId)
         call.enqueue(object : Callback<DeviceTemp> {
             override fun onResponse(call: Call<DeviceTemp>, response: Response<DeviceTemp>) {
@@ -90,23 +92,20 @@ class ApiCalls {
                 if (response.isSuccessful) {
                     val device = response.body()
                     if (device != null) {
-                        // If the device exists, return the device object
+                        // Log the device details to confirm if Date fields are parsed correctly
+                        Log.d(TAG, "Device: $device")
                         callback(device)
                     } else {
-                        // If the device is found but empty, return null
                         Log.e(TAG, "Device response is empty.")
                         callback(null)
                     }
                 } else {
-                    // If the device is not found or some error occurs, log it
-                    Log.e(TAG, response.message())
-                    Log.e("error_", "Failed to fetch device: ${response.message()}")
+                    Log.e(TAG, "Failed to fetch device: ${response.message()}")
                     callback(null)
                 }
             }
 
             override fun onFailure(call: Call<Device>, t: Throwable) {
-                // If there was a network error, return null and log the error
                 Log.e(TAG, "Network error: ${t.message}")
                 callback(null)
             }
@@ -128,6 +127,30 @@ class ApiCalls {
             override fun onFailure(call: Call<Device>, t: Throwable) {
                 Log.e(TAG, "error in update"+t.message.toString() )
                 callback("Network error: ${t.message}", null)
+            }
+        })
+    }
+
+    // crud for schedules
+    fun getSchedulesByDeviceId(deviceId: String, callback: (List<Schedule?>?) -> Any) {
+        Api.getSchedulesByDeviceId(deviceId)?.enqueue(object : Callback<List<Schedule?>?> {
+            override fun onResponse(
+                call: Call<List<Schedule?>?>,
+                response: Response<List<Schedule?>?>
+            ) {
+                if (response.isSuccessful) {
+                    val schedules = response.body()
+                    // Handle the schedules, update UI, etc.
+                    callback(schedules)
+                } else {
+                    Log.e(TAG, "error in getting schedules" + response.message())
+                    callback(null)
+                }
+            }
+
+            override fun onFailure(call: Call<List<Schedule?>?>, t: Throwable) {
+                Log.e(TAG, "error in getting schedules" + t.message.toString())
+                callback(null)
             }
         })
     }
