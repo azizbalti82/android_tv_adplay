@@ -11,7 +11,7 @@ import retrofit2.http.Path
 interface ApiInterface {
     // Endpoint to create a device
     @POST("/temp_devices")
-    fun createDevice(): Call<CreateDeviceResponse>
+    fun createTempDevice(): Call<CreateDeviceResponse>
 
     // Endpoint to get a device temp by ID
     @GET("/temp_devices/{deviceId}")

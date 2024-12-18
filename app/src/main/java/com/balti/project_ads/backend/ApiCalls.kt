@@ -12,7 +12,8 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 class ApiCalls {
-    private val baseUrl = "http://192.168.1.255:3000/"
+    val TAG = "error_server"
+    private val baseUrl = "http://192.168.1.122:3000/"
 
     // Initialize Retrofit
     private val retrofit = Retrofit.Builder()
@@ -23,24 +24,27 @@ class ApiCalls {
     private val Api = retrofit.create(ApiInterface::class.java)
 
     // CRUD operations for devices temp
-    fun createDevice(callback: (String, DeviceTemp?) -> Unit) {
+    fun createTempDevice(callback: (String, DeviceTemp?) -> Unit) {
         // Call the server's endpoint that creates the device
-        val call = Api.createDevice()
+        val call = Api.createTempDevice()
         // Enqueue the request
         call.enqueue(object : Callback<CreateDeviceResponse> {
             override fun onResponse(call: Call<CreateDeviceResponse>, response: Response<CreateDeviceResponse>) {
                 if (response.isSuccessful && response.body() != null) {
                     val responseBody = response.body()
+                    Log.d(TAG, "the created code: "+responseBody?.device.toString())
                     // Return the success message and device object
-                    callback(responseBody!!.message, responseBody.deviceTemp)
+                    callback(responseBody!!.message, responseBody.device)
                 } else {
                     // Handle API error or empty response
+                    Log.e(TAG, response.message())
                     callback("Failed to create device: ${response.message()}", null)
                 }
             }
 
             override fun onFailure(call: Call<CreateDeviceResponse>, t: Throwable) {
                 // Handle network or other failures
+                Log.e(TAG, t.message.toString())
                 callback("Network error: ${t.message}", null)
             }
         })
@@ -52,10 +56,12 @@ class ApiCalls {
                 if (response.isSuccessful) {
                     callback("Device fetched successfully", response.body())
                 } else {
+                    Log.e(TAG, response.message())
                     callback("Failed to fetch device: ${response.message()}", null)
                 }
             }
             override fun onFailure(call: Call<DeviceTemp>, t: Throwable) {
+                Log.e(TAG, t.message.toString())
                 callback("Network error: ${t.message}", null)
             }
         })
@@ -67,16 +73,16 @@ class ApiCalls {
         call.enqueue(object : Callback<Device> {
             override fun onResponse(call: Call<Device>, response: Response<Device>) {
                 // If the device exists, it's considered connected
+                Log.e(TAG, response.message())
                 callback(response.isSuccessful)
             }
 
             override fun onFailure(call: Call<Device>, t: Throwable) {
+                Log.e(TAG, t.message.toString())
                 callback(false)
-                Log.e("error", t.message.toString())
             }
         })
     }
-
     fun getDevice(deviceId: String, callback: (Device?) -> Unit) {
         val call = Api.getDevice(deviceId) // Get device to check if connected
         call.enqueue(object : Callback<Device> {
@@ -88,11 +94,12 @@ class ApiCalls {
                         callback(device)
                     } else {
                         // If the device is found but empty, return null
-                        Log.e("error_", "Device response is empty.")
+                        Log.e(TAG, "Device response is empty.")
                         callback(null)
                     }
                 } else {
                     // If the device is not found or some error occurs, log it
+                    Log.e(TAG, response.message())
                     Log.e("error_", "Failed to fetch device: ${response.message()}")
                     callback(null)
                 }
@@ -100,7 +107,7 @@ class ApiCalls {
 
             override fun onFailure(call: Call<Device>, t: Throwable) {
                 // If there was a network error, return null and log the error
-                Log.e("error_", "Network error: ${t.message}")
+                Log.e(TAG, "Network error: ${t.message}")
                 callback(null)
             }
         })
@@ -113,13 +120,14 @@ class ApiCalls {
                 if (response.isSuccessful && response.body() != null) {
                     callback("Device updated successfully", response.body())
                 } else {
+                    Log.e(TAG, response.message())
                     callback("Failed to update device: ${response.message()}", null)
                 }
             }
 
             override fun onFailure(call: Call<Device>, t: Throwable) {
+                Log.e(TAG, "error in update"+t.message.toString() )
                 callback("Network error: ${t.message}", null)
-                Log.e("error", "error in update"+t.message.toString() )
             }
         })
     }

@@ -1,7 +1,6 @@
 package com.balti.project_ads
 
 import android.content.Context
-import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -12,14 +11,9 @@ import com.balti.project_ads.backend.ApiCalls
 import com.balti.project_ads.backend.shared
 import com.balti.project_ads.databinding.ActivityMainBinding
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.DataSource
-import com.bumptech.glide.load.engine.GlideException
-import com.bumptech.glide.request.RequestListener
-import com.bumptech.glide.request.target.Target
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
-import com.google.android.exoplayer2.ui.PlayerView
 
 class MainActivity : FragmentActivity() {
     private lateinit var bindHome: ActivityMainBinding
@@ -75,7 +69,7 @@ class MainActivity : FragmentActivity() {
         //start loading animation
         show_loading()
         apiCalls.isDeviceConnected(deviceId) { connected ->
-            if (true /*replace true with 'connected'*/) {
+            if (connected /*replace true with 'connected'*/) {
                 //update connectivity status
                 set_connectivity(true)
 
@@ -124,14 +118,16 @@ class MainActivity : FragmentActivity() {
 
     //api functions ---------------------------------------------
     fun create_device() {
-        apiCalls.createDevice { message, device ->
+        apiCalls.createTempDevice { message, device ->
+            Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+
             if (device != null) {
                 // Device céreation successful
                 shared.save_id(this, device.id)
                 show_connect_section(device.id)
             } else {
                 // Handle error message
-                Log.e("API_ERROR", message)
+                Log.e("error_server", message)
                 show_offline_section("create_temp_device")
             }
         }

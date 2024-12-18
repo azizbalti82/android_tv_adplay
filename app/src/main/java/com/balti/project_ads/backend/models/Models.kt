@@ -3,7 +3,7 @@ import java.util.Date
 
 data class CreateDeviceResponse(
     val message: String,
-    val deviceTemp: DeviceTemp
+    val device: DeviceTemp
 )
 
 data class DeviceTemp(
@@ -13,6 +13,8 @@ data class DeviceTemp(
     val createdAt: String,
     val __v: Int
 )
+
+
 data class Device(
     val id: String ="",           // Unique device ID
     val name: String="",         // Device name
