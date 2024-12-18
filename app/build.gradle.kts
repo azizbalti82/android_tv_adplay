@@ -48,4 +48,15 @@ dependencies {
     //retrofit for api calls
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
+
+    //to read media
+    implementation("com.google.android.exoplayer:exoplayer-core:2.18.0")
+    implementation("com.google.android.exoplayer:exoplayer-ui:2.18.0")
+    implementation(libs.glide) //for image
+    implementation(libs.lottie)
+    implementation(libs.androidx.appcompat)
+
+
+
+
 }

@@ -12,7 +12,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 class ApiCalls {
-    private val baseUrl = "http://192.168.160.250  :3000/"
+    private val baseUrl = "http://192.168.1.255:3000/"
 
     // Initialize Retrofit
     private val retrofit = Retrofit.Builder()
