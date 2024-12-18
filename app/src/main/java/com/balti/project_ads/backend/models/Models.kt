@@ -1,12 +1,13 @@
 package com.balti.project_ads.backend.models
 import java.util.Date
 
-data class CreateDeviceResponse(
-    val message: String,
-    val device: DeviceTemp
-)
 
+//for device temp
 data class DeviceTemp(
+    val message: String,
+    val device: DeviceTemp_content
+)
+data class DeviceTemp_content(
     val id: String,
     val _id: String,
     val status: String,
@@ -15,18 +16,27 @@ data class DeviceTemp(
 )
 
 
-
+//for device
 data class Device(
-    val id: String,  // Unique identifier
-    val name: String,  // Name of the device
-    var status: String = "offline",  // Default value 'offline'
-    val createdAt: Date = Date(),  // Default is the current date and time
-    val lastSeen: Date = Date()  // Default is the current date and time
+    val Device: device_content
+)
+data class device_content(
+    val _id:String,
+    val id: String,
+    val name: String,
+    var status: String = "offline",
+    val createdAt: Date = Date(),
+    val lastSeen: Date = Date(),
+    val __v:String
 )
 
+//status (use it to update status of device)
+data class Status(
+    val status: String
+)
 
+//for schedule
 class Schedule {
-    // Getters and setters
     var id: String? = null
     var ad_id: String? = null
     var device_id: String? = null
@@ -36,6 +46,8 @@ class Schedule {
     var status: String? = null
 }
 
+
+//for ad
 data class Ad(
     val ad: ad_content
 )

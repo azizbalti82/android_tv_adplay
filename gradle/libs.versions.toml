@@ -18,6 +18,9 @@ androidx-leanback = { group = "androidx.leanback", name = "leanback", version.re
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtx" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "retrofit" }
 exoplayer = { module = "com.google.android.exoplayer:exoplayer", version.ref = "exoplayer" }
+exoplayer-core = { module = "com.google.android.exoplayer:exoplayer-core", version.ref = "exoplayer" }
+exoplayer-ui = { module = "com.google.android.exoplayer:exoplayer-ui", version.ref = "exoplayer" }
+extension-cronet = { module = "com.google.android.exoplayer:extension-cronet", version.ref = "exoplayer" }
 glide = { group = "com.github.bumptech.glide", name = "glide", version.ref = "glide" }
 java-websocket = { module = "org.java-websocket:Java-WebSocket", version.ref = "javaWebsocket" }
 lottie = { module = "com.airbnb.android:lottie", version.ref = "lottie" }

@@ -1,8 +1,9 @@
 import com.balti.project_ads.backend.models.Ad
-import com.balti.project_ads.backend.models.CreateDeviceResponse
-import com.balti.project_ads.backend.models.Device
 import com.balti.project_ads.backend.models.DeviceTemp
+import com.balti.project_ads.backend.models.Device
+import com.balti.project_ads.backend.models.DeviceTemp_content
 import com.balti.project_ads.backend.models.Schedule
+import com.balti.project_ads.backend.models.Status
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -14,11 +15,11 @@ import retrofit2.http.Path
 interface ApiInterface {
     // Endpoint to create a device
     @POST("/temp_devices")
-    fun createTempDevice(): Call<CreateDeviceResponse>
+    fun createTempDevice(): Call<DeviceTemp>
 
     // Endpoint to get a device temp by ID
     @GET("/temp_devices/{deviceId}")
-    fun getDeviceTemp(@Path("deviceId") deviceId: String): Call<DeviceTemp>
+    fun getDeviceTemp(@Path("deviceId") deviceId: String): Call<DeviceTemp_content>
 
     // Endpoint to get a device by ID
     @GET("/devices/{deviceId}")
@@ -26,10 +27,10 @@ interface ApiInterface {
 
     // Endpoint to update a device by ID
     @PUT("/devices/{deviceId}")
-    fun updateDevice(
+    fun updateDeviceStatus(
         @Path("deviceId") deviceId: String,
-        @Body device: Device
-    ): Call<Device>
+        @Body status: Status
+    ): Call<Boolean>
 
     //get all schedules for a specific device
     @GET("schedules/search/device/{deviceId}")

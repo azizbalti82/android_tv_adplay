@@ -12,12 +12,19 @@ import androidx.work.Data
 import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkManager
 import com.balti.project_ads.backend.ApiCalls
+import com.balti.project_ads.backend.models.Status
 import com.balti.project_ads.backend.shared
 import com.balti.project_ads.databinding.ActivityMainBinding
 import com.bumptech.glide.Glide
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
+import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
+import com.google.android.exoplayer2.upstream.cache.CacheDataSource
+import com.google.android.exoplayer2.upstream.cache.LeastRecentlyUsedCacheEvictor
+import com.google.android.exoplayer2.upstream.cache.SimpleCache
+import com.google.android.exoplayer2.util.Util
+import java.io.File
 import java.util.Calendar
 import java.util.Date
 import java.util.concurrent.TimeUnit
@@ -28,6 +35,10 @@ class MainActivity : FragmentActivity() {
     private lateinit var apiCalls:ApiCalls
     private val TAG = "MainActivity"
 
+    override fun onDestroy() {
+        super.onDestroy()
+        set_connectivity(false)
+    }
     override fun onBackPressed() {
         // Prevent the app from closing
         Log.d("MainActivity", "Back button pressed. Action prevented.")
@@ -40,6 +51,11 @@ class MainActivity : FragmentActivity() {
         set_connectivity(false)
     }
 
+    override fun onResume() {
+        super.onResume()
+        set_connectivity(true)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         bindHome = ActivityMainBinding.inflate(layoutInflater)
@@ -47,6 +63,9 @@ class MainActivity : FragmentActivity() {
 
         //save bindhome
         data.bindHome = bindHome
+
+        //initialise the media player
+        data.initializeExoPlayer(this)
 
         //listeners
         bindHome.refrech.setOnClickListener {
@@ -109,7 +128,6 @@ class MainActivity : FragmentActivity() {
         //if device added to server
         show_home_section()
 
-
         //get schedule of this device
         get_schdules(deviceId)
 
@@ -165,20 +183,21 @@ class MainActivity : FragmentActivity() {
         apiCalls.getDevice(deviceId) { device ->
             //Toast.makeText(this, device.toString(), Toast.LENGTH_SHORT).show()
             if (device != null) {
-                device.name?.let { Log.d("error_", it) }
+                device.Device.name.let { Log.d("error_", it) }
                 if(connected){
-                    device.status = "online"
+                    device.Device.status = "online"
 
                 }else{
-                    device.status = "offline"
+                    device.Device.status = "offline"
                 }
-
+                Log.d("error_server", device.Device.toString())
                 //update device in server
-                device.id?.let {
-                    apiCalls.updateDevice(it,device) { message, device ->
-                        if (device == null) {
+                device.Device.id.let { id->
+                    val new_device = Status(status = device.Device.status)
+                    apiCalls.updateDevice(id,new_device) { is_updated ->
+                        if (is_updated) {
                             // Device update successful
-                            Log.d("error", message)
+                            Log.d("error","error while updating status")
                         }
                     }
                 }

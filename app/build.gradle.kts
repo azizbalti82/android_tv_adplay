@@ -40,8 +40,7 @@ android {
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.leanback)
-    implementation(libs.glide)
-
+    implementation(libs.androidx.appcompat)
     //websocket
     implementation(libs.java.websocket)
 
@@ -50,11 +49,12 @@ dependencies {
     implementation(libs.converter.gson)
 
     //to read media
-    implementation("com.google.android.exoplayer:exoplayer-core:2.18.0")
-    implementation("com.google.android.exoplayer:exoplayer-ui:2.18.0")
+    implementation(libs.exoplayer.core)
+    implementation(libs.exoplayer.ui)
+    implementation (libs.extension.cronet)
     implementation(libs.glide) //for image
     implementation(libs.lottie)
-    implementation(libs.androidx.appcompat)
+
 
     //to schedule tasks
     implementation(libs.androidx.work.runtime.ktx)
