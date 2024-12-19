@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        /* Sidebar styles */
+        .sidebar {
+            height: 100vh;
+            width: 250px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: #343a40;
+            padding-top: 20px;
+        }
+
+        .sidebar a {
+            padding: 15px;
+            text-align: center;
+            display: block;
+            color: white;
+            text-decoration: none;
+        }
+
+        .sidebar a:hover {
+            background-color: #575757;
+        }
+
+        .content {
+            margin-left: 260px;
+            padding: 20px;
+        }
+
+        .active-section {
+            display: block;
+        }
+
+        .inactive-section {
+            display: none;
+        }
+
+        .form-container {
+            display: none; /* Hidden by default */
+            width: 400px;
+            margin-top: 20px;
+            padding: 20px;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: white;
+        }
+
+        .form-container h4 {
+            margin-bottom: 20px;
+        }
+
+
+        /* Style the "Log out" link like a button */
+        .logout-btn {
+            text-align: center;
+            background-color: #ab4646; /* Red color for the button */
+            color: white;
+            border-radius: 5px;
+            text-decoration: none;
+            cursor: pointer;
+            margin: 80px;
+            margin-top: 100%;
+            transition: background-color 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background-color: #e04343; /* Darker red on hover */
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar Navigation -->
+<div class="sidebar">
+    <div style="display: flex; justify-content: center; margin-bottom: 20px;">
+        <img src="/images/logo.png" alt="Logo" style="width: 80px; height: auto;">
+    </div>
+    
+    <a href="javascript:void(0)" onclick="showSection('devices')">Devices</a>
+    <a href="javascript:void(0)" onclick="showSection('ads')">Ads</a>
+    <a href="javascript:void(0)" onclick="showSection('schedule')">Schedule</a>
+
+    <!-- Log out link at the bottom styled as a button -->
+    <a href="javascript:void(0)" class="logout-btn" onclick="logout()">Log out</a>
+</div>
+
+
+    <!-- Main Content Area -->
+    <div class="content">
+        <!-- Devices Section -->
+        <section id="devices" class="active-section">
+            <div class="row">
+                <div class="col-12">
+                    <button class="btn btn-primary mb-4 mt-3" onclick="toggleForm('deviceForm')">Add New Device</button>
+                    <!-- this is for creat -->
+                    <div id="deviceForm" class="form-container mb-5">
+                        <h4>Add Device</h4>
+                        <form onsubmit="return addDevice(event)">
+                            <div class="form-group">
+                                <label for="deviceCodeInput">Code</label>
+                                <input type="text" class="form-control" id="deviceCodeInput" placeholder="Enter device code">
+                            </div>
+                            <div class="form-group">
+                                <label for="deviceNameInput">Name</label>
+                                <input type="text" class="form-control" id="deviceNameInput" placeholder="Enter device name">
+                            </div>
+                            <button type="submit" class="btn btn-success">Add Device</button>
+                        </form>
+                    </div>
+                    <!-- this is for edit -->
+                    <div id="deviceFormEdit" class="form-container mb-5">
+                        <h4>Edit Device</h4>
+                        <form>
+                            <div class="form-group">
+                                <label for="deviceNameInputEdit">Name</label>
+                                <input type="text" class="form-control" id="deviceNameInputEdit" placeholder="Enter device name">
+                            </div>
+                            <button class="btn btn-success" id="update_device_button">Edit Device</button>
+                        </form>
+                    </div>
+                    <table id="deviceTable" class="table table-striped table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Device Name</th>
+                                <th>Creation Date</th>
+                                <th>Last Seen Online</th>
+                                <th>Status</th>
+                                <th>Tools</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!--data will be loaded dynamically-->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Ads Section -->
+        <section id="ads" class="inactive-section">
+            <div class="row">
+                <div class="col-12">
+                    <button class="btn btn-primary mb-4 mt-3" onclick="toggleForm('adForm')">Add New Ad</button>
+                    <!-- this is for creat -->
+                    <div id="adForm" class="form-container mb-5">
+                        <h4>Add Ad</h4>
+                        <form onsubmit="return addAd(event)">
+                            <div class="form-group">
+                                <label for="adTitleInput">Title</label>
+                                <input type="text" class="form-control" id="adTitleInput" placeholder="Enter ad title">
+                            </div>
+                            <div class="form-group">
+                                <label for="adDescriptionInput">Description</label>
+                                <textarea class="form-control" id="adDescriptionInput" rows="3" placeholder="Enter ad description"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="adTypeSelect">Type</label>
+                                <select class="form-control" id="adTypeSelect">
+                                    <option value="image">Image</option>
+                                    <option value="music">Music</option>
+                                    <option value="video">Video</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="adMediaInput">Media</label>
+                                <input type="file" class="form-control-file" id="adMediaInput" name="upload_media" accept="image/*,audio/*,video/*">
+                            </div>
+                            <button type="submit" class="btn btn-success">Add Ad</button>
+                        </form>
+                    </div>
+
+                    <!-- this is for edit -->
+                    <div id="adFormEdit" class="form-container mb-5">
+                        <h4>Edit Ad</h4>
+                        <form>
+                            <div class="form-group">
+                                <label for="adTitleInputEdit">Title</label>
+                                <input type="text" class="form-control" id="adTitleInputEdit" placeholder="Enter ad title">
+                            </div>
+                            <div class="form-group">
+                                <label for="adDescriptionInputEdit">Description</label>
+                                <textarea class="form-control" id="adDescriptionInputEdit" rows="3" placeholder="Enter ad description"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="adTypeSelectEdit">Type</label>
+                                <select class="form-control" id="adTypeSelectEdit">
+                                    <option id="image_option_edit" value="image">Image</option>
+                                    <option id="music_option_edit" value="music">Music</option>
+                                    <option id="video_option_edit" value="video">Video</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="adMediaInput">Media</label>
+                                <input type="file" class="form-control-file" id="adMediaInputEdit" accept="image/*,audio/*,video/*">
+                            </div>
+                            <button class="btn btn-success" id="update_ad_button">Edit Ad</button>
+                        </form>
+                    </div>
+                    <table id="adTable" class="table table-striped table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Description</th>
+                                <th>Creation date</th>
+                                <th>Type</th>
+                                <th>Media URL</th>
+                                <th>Tools</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!--data will be loaded dynamically-->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- Schedule Section -->
+        <section id="schedule" class="inactive-section">
+            <div class="row">
+                <div class="col-12">
+                    <button class="btn btn-primary mb-4 mt-3" onclick="toggleForm('scheduleForm')">Add New Schedule</button>
+                    <!-- this is for create -->
+                    <div id="scheduleForm" class="form-container mb-5">
+                        <h4>Add Schedule</h4>
+                        <form onsubmit="return addSchedule(event)">
+                            <div class="form-group">
+                                <label for="scheduleAdSelect">Ad</label>
+                                <select class="form-control" id="scheduleAdSelect">
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="scheduleDeviceSelect">Device</label>
+                                <select class="form-control" id="scheduleDeviceSelect">
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="scheduleStartInput">Start Time</label>
+                                <input type="datetime-local" class="form-control" id="scheduleStartInput">
+                            </div>
+                            <div class="form-group">
+                                <label for="scheduleEndInput">End Time</label>
+                                <input type="datetime-local" class="form-control" id="scheduleEndInput">
+                            </div>
+                            <button type="submit" class="btn btn-success">Add Schedule</button>
+                        </form>
+                    </div>
+                    <!-- this is for edit -->
+                    <div id="scheduleFormEdit" class="form-container mb-5">
+                        <h4>Edit Schedule</h4>
+                        <form>
+                            <div class="form-group">
+                                <label for="scheduleAdSelectEdit">Ad</label>
+                                <select class="form-control" id="scheduleAdSelectEdit">
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="scheduleDeviceSelectEdit">Device</label>
+                                <select class="form-control" id="scheduleDeviceSelectEdit">
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="scheduleStartInputEdit">Start Time</label>
+                                <input type="datetime-local" class="form-control" id="scheduleStartInputEdit">
+                            </div>
+                            <div class="form-group">
+                                <label for="scheduleEndInputEdit">End Time</label>
+                                <input type="datetime-local" class="form-control" id="scheduleEndInputEdit">
+                            </div>
+                            <button type="submit" class="btn btn-success" id="update_schedule_button">Edit Schedule</button>
+                        </form>
+                    </div>
+                    <table id="scheduleTable"  class="table table-striped table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Ad</th>
+                                <th>Device</th>
+                                <th>Start</th>
+                                <th>End</th>
+                                <th>Orientation</th>
+                                <th>Status</th>
+                                <th>Tools</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!--data will be loaded dynamically-->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="/javascript/script.js"></script>
+
+</body>
+</html>
