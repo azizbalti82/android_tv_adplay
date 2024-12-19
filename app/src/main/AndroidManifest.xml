@@ -22,11 +22,11 @@
         android:theme="@style/Theme.Project_ads">
         <activity
             android:name=".MainActivity"
-            android:banner="@drawable/banner"
+            android:banner="@drawable/logo"
             android:exported="true"
-            android:icon="@drawable/banner"
+            android:icon="@drawable/logo"
             android:label="@string/app_name"
-            android:logo="@drawable/banner"
+            android:logo="@drawable/logo"
             android:screenOrientation="landscape"
             android:configChanges="orientation|screenSize|keyboardHidden">
             >

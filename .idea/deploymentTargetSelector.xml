@@ -3,11 +3,11 @@
   <component name="deploymentTargetSelector">
     <selectionStates>
       <SelectionState runConfigName="app">
-        <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2024-12-18T22:19:40.043616200Z">
+        <option name="selectionMode" value="DIALOG" />
+        <DropdownSelection timestamp="2024-12-19T13:46:04.167028500Z">
           <Target type="DEFAULT_BOOT">
             <handle>
-              <DeviceId pluginId="PhysicalDevice" identifier="serial=e7a4397" />
+              <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\aziz\.android\avd\Television_720p_API_34.avd" />
             </handle>
           </Target>
         </DropdownSelection>
@@ -15,7 +15,12 @@
           <targets>
             <Target type="DEFAULT_BOOT">
               <handle>
-                <DeviceId pluginId="PhysicalDevice" identifier="serial=e7a4397" />
+                <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\aziz\.android\avd\Television_720p_API_34.avd" />
+              </handle>
+            </Target>
+            <Target type="DEFAULT_BOOT">
+              <handle>
+                <DeviceId pluginId="LocalEmulator" identifier="path=C:\Users\aziz\.android\avd\Television_720p_android_12_api_31.avd" />
               </handle>
             </Target>
           </targets>
