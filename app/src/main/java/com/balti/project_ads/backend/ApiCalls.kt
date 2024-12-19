@@ -3,8 +3,8 @@ package com.balti.project_ads.backend
 import ApiInterface
 import android.util.Log
 import com.balti.project_ads.backend.models.Ad
-import com.balti.project_ads.backend.models.DeviceTemp
 import com.balti.project_ads.backend.models.Device
+import com.balti.project_ads.backend.models.DeviceTemp
 import com.balti.project_ads.backend.models.DeviceTemp_content
 import com.balti.project_ads.backend.models.Schedule
 import com.balti.project_ads.backend.models.Status

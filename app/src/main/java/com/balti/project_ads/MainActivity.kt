@@ -1,8 +1,6 @@
 package com.balti.project_ads
 
 
-import android.content.Context
-import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -15,17 +13,6 @@ import com.balti.project_ads.backend.ApiCalls
 import com.balti.project_ads.backend.models.Status
 import com.balti.project_ads.backend.shared
 import com.balti.project_ads.databinding.ActivityMainBinding
-import com.bumptech.glide.Glide
-import com.google.android.exoplayer2.ExoPlayer
-import com.google.android.exoplayer2.MediaItem
-import com.google.android.exoplayer2.Player
-import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
-import com.google.android.exoplayer2.upstream.cache.CacheDataSource
-import com.google.android.exoplayer2.upstream.cache.LeastRecentlyUsedCacheEvictor
-import com.google.android.exoplayer2.upstream.cache.SimpleCache
-import com.google.android.exoplayer2.util.Util
-import java.io.File
-import java.util.Calendar
 import java.util.Date
 import java.util.concurrent.TimeUnit
 
@@ -72,23 +59,25 @@ class MainActivity : FragmentActivity() {
             get_schdules(deviceId)
         }
 
-//        val root: View = bindHome.root
-//        // Get screen dimensions
-//        val displayMetrics = resources.displayMetrics
-//        val height = displayMetrics.heightPixels
-//        val width = displayMetrics.widthPixels
-//        // Swap width and height
-//        root.layoutParams = root.layoutParams.apply {
-//            this.height = width
-//            this.width = height
-//        }
-//        // Set the pivot to the center of the screen
-//        root.pivotX = (height/1.125).toFloat()
-//        root.pivotY = (height/1.125).toFloat()
-//        // Apply rotation
-//        root.rotation = 90f
-//        // Ensure the layout is centered
-//        root.requestLayout()
+        // rotate the screen to portrait ----------------------
+        val root: View = bindHome.root
+        // Get screen dimensions
+        val displayMetrics = resources.displayMetrics
+        val height = displayMetrics.heightPixels
+        val width = displayMetrics.widthPixels
+        // Swap width and height
+        root.layoutParams = root.layoutParams.apply {
+            this.height = width
+            this.width = height
+        }
+        // Set the pivot to the center of the screen
+        root.pivotX = (height/1.125).toFloat()
+        root.pivotY = (height/1.125).toFloat()
+        // Apply rotation
+        root.rotation = 90f
+        // Ensure the layout is centered
+        root.requestLayout()
+        //-----------------------------------------------------
 
 
         // Logic for device connection

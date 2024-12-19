@@ -7,7 +7,8 @@ import com.google.gson.JsonDeserializer
 import com.google.gson.JsonElement
 import java.lang.reflect.Type
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
 
 class DateDeserializer : JsonDeserializer<Date> {
     override fun deserialize(json: JsonElement, typeOfT: Type, context: JsonDeserializationContext): Date? {
