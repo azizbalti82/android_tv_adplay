@@ -127,7 +127,7 @@ async function fetchAds(section) {
 
                 const mediaUrl = document.createElement('td');
                 const link = document.createElement('a');
-                link.href = "ads/media/"+device.id;
+                link.href = "media/"+device.id;
                 link.textContent = "Preview";
                 link.target = '_blank';
                 mediaUrl.appendChild(link);
