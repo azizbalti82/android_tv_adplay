@@ -346,8 +346,8 @@ async function fetchSchedules() {
                     // Create the table cell for the status
                     const statusCell = document.createElement('td');
                     // For each schedule, update the status depending on the date: waiting | showing now | completed
-                    start_sch = new Date(schedule.start);
-                    end_sch = new Date(schedule.end);
+                    start_sch = new Date(formatDate(schedule.start));
+                    end_sch = new Date(formatDate(schedule.end));
                     let statusText = "";  // Use a different name for the status text variable
 
                     if (start_sch > Date.now()) {
