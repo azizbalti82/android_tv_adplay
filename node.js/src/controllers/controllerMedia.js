@@ -18,47 +18,47 @@ const upload_media = async (req, res) => {
     try {
         const { adId } = req.params;
 
-        // Check if the Ad exists
-        const ad = await Ad.findById(adId);
-        if (!ad) {
-            return res.status(404).json({ message: 'Ad not found' });
+        // Validate adId
+        if (!adId) {
+            return res.status(400).json({ message: 'Ad ID is required' });
         }
 
-        if (!req.file) {
+        // Check if media already exists
+        const existingMedia = await Media.findOne({ id: adId });
+        if (existingMedia) {
+            return res.status(400).json({ message: 'Media for this Ad ID already exists' });
+        }
+
+        // Handle the uploaded file using multer
+        const file = req.file; // Multer provides the file object
+
+        if (!file) {
             return res.status(400).json({ message: 'No file uploaded' });
         }
 
-        // Store the file in GridFS
-        const writeStream = gfs.createWriteStream({
-            filename: req.file.originalname,
-            content_type: req.file.mimetype,
+        // Save metadata to Media collection
+        const media = new Media({
+            id: adId,
         });
 
-        // Pipe the file buffer to GridFS
-        fs.createReadStream(req.file.path).pipe(writeStream);
+        await media.save();
 
-        writeStream.on('close', async (file) => {
-            // Save metadata in the Media collection
-            const media = new Media({
-                filename: file.filename,
-                contentType: file.contentType,
-                adId: ad._id,
-            });
-            await media.save();
+        // Save file to GridFS with adId as the filename
+        const writeStream = gfs.createWriteStream({
+            filename: adId, // Save file with adId as the filename
+            content_type: file.mimetype,
+        });
 
-            // Delete local file
-            fs.unlinkSync(req.file.path);
+        writeStream.write(file.buffer); // Write file content
+        writeStream.end();
 
-            res.status(200).json({
-                message: 'Media uploaded successfully',
-                mediaId: media._id,
-                filename: file.filename,
-            });
+        writeStream.on('close', () => {
+            res.status(201).json({ message: 'Media uploaded successfully' });
         });
 
         writeStream.on('error', (err) => {
             console.error(err);
-            res.status(500).json({ message: 'Failed to upload media' });
+            res.status(500).json({ message: 'Error uploading file to GridFS' });
         });
     } catch (err) {
         console.error(err);
@@ -66,26 +66,29 @@ const upload_media = async (req, res) => {
     }
 };
 
+
 // Get media
 const get_media = async (req, res) => {
     try {
-        const { mediaId } = req.params;
+        const { adId } = req.params;
 
         // Find the media metadata by ID
-        const media = await Media.findById(mediaId);
+        const media = await Media.findOne({ id: adId });
+
         if (!media) {
             return res.status(404).json({ message: 'Media not found' });
         }
 
-        // Fetch the file from GridFS
-        const file = await gfs.files.findOne({ filename: media.filename });
+        // Fetch the file from GridFS using adId as the filename
+        const file = await gfs.files.findOne({ filename: adId });
+
         if (!file) {
             return res.status(404).json({ message: 'File not found in GridFS' });
         }
 
         // Set the Content-Type and pipe the file to the response
         res.set('Content-Type', file.contentType);
-        const readStream = gfs.createReadStream({ filename: file.filename });
+        const readStream = gfs.createReadStream({ filename: adId });
         readStream.pipe(res);
 
         readStream.on('error', (err) => {
@@ -97,5 +100,6 @@ const get_media = async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 };
+
 
 module.exports = { upload_media, get_media };

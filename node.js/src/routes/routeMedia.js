@@ -5,7 +5,9 @@ const { upload_media, get_media } = require('../controllers/controllerMedia');
 const router = express.Router();
 
 // Configure multer
-const upload = multer({ dest: 'uploads/' });
+// Use multer memory storage
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
 
 // Upload media for a specific ad
 router.post('/media/:adId', upload.single('file'), upload_media);

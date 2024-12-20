@@ -638,7 +638,7 @@ async function uploadAdMedia(id, media) {
 
     try {
         // Send POST request to upload the file
-        const response = await fetch(url+'/media/${id}', { // Adjusted URL to match the new route
+        const response = await fetch(url+'/media/'+id, { // Adjusted URL to match the new route
             method: 'POST',
             body: formData, // Send FormData directly
         });
