@@ -313,15 +313,25 @@ async function fetchSchedules() {
             for (const schedule of schedules) {
                 const row = document.createElement('tr');
                 try {
+                    // Split the concatenated string into individual ad IDs
+                    const adIds = schedule.ad_id.split(';');
+                    
+                    ads = []
+                    for (const ad of adIds) {
+                        ads.push(ad)
+                    }
+
+
+
                     // Extract ad_title and device_name from the lookup maps
-                    const ad = adsMap[schedule.ad_id];
+                    const ad = adsMap[ads[0]];
                     const device = devicesMap[schedule.device_id];
 
-                    console.log('ad for this schedule are: '+ad.title)
+                    console.log('ad for this schedule are: '+ad.id)
                     
                     // Populate the table row
                     const ad_id = document.createElement('td');
-                    ad_id.textContent = ad.title;
+                    ad_id.textContent = ad.title+' and '+(ads.length - 1)+' more';
                     row.appendChild(ad_id);
                 
 
