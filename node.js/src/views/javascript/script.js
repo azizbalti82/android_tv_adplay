@@ -2,7 +2,7 @@
 async function fetchDevices(section) {
     try {
         // Fetch data from the API
-        const response = await fetch('http://localhost:3000/devices');
+        const response = await fetch(url+'/devices');
         const devices = await response.json();
 
         // Get the table body element
@@ -79,7 +79,7 @@ async function fetchDevices(section) {
 async function fetchAds(section) {
     try {
         // Fetch data from the API
-        const response = await fetch('http://localhost:3000/ads');
+        const response = await fetch(url+'/ads');
         const devices = await response.json();
 
         // Get the table body element
@@ -165,7 +165,7 @@ async function fetchSchedules() {
         tableBody.innerHTML = '';
 
         // Fetch data from the API
-        const response = await fetch('http://localhost:3000/schedules');
+        const response = await fetch(url+'/schedules');
         const result = await response.json();
 
         // Check if there are any devices
@@ -176,10 +176,10 @@ async function fetchSchedules() {
 
                 try {
                     // Fetch additional details for the device and ad
-                    const deviceResponse = await fetch(`http://localhost:3000/devices/${device.device_id}`);
+                    const deviceResponse = await fetch(`url+'/devices/${device.device_id}`);
                     const deviceData = await deviceResponse.json();
 
-                    const adResponse = await fetch(`http://localhost:3000/ads/${device.ad_id}`);
+                    const adResponse = await fetch(`url+'/ads/${device.ad_id}`);
                     const adData = await adResponse.json();
                     
                     // Populate the table row
@@ -253,7 +253,7 @@ async function fetchSchedules() {
                     
                     // Delete the schedule if the ad or device is missing
                     if (e.message.includes('undefined')) {
-                        await fetch(`http://localhost:3000/schedules/${device.id}`, { method: 'DELETE' });
+                        await fetch(`url+'/schedules/${device.id}`, { method: 'DELETE' });
                         console.log(`Deleted schedule with ID: ${device.id}`);
                     }
                 }
@@ -285,9 +285,9 @@ async function fetchSchedules() {
     try {
         // Fetch schedules, devices, and ads
         const [scheduleResponse, deviceResponse, adResponse] = await Promise.all([
-            fetch('http://localhost:3000/schedules'),
-            fetch('http://localhost:3000/devices'),
-            fetch('http://localhost:3000/ads'),
+            fetch(url+'/schedules'),
+            fetch(url+'/devices'),
+            fetch(url+'/ads'),
         ]);
 
         const schedules = await scheduleResponse.json();
@@ -387,7 +387,7 @@ async function fetchSchedules() {
                     
                     // Delete the schedule if the ad or device is missing
                     if (e.message.includes('undefined')) {
-                        await fetch(`http://localhost:3000/schedules/${schedule.id}`, { method: 'DELETE' });
+                        await fetch(`url+'/schedules/${schedule.id}`, { method: 'DELETE' });
                         console.log(`Deleted schedule with ID: ${schedule.id}`);
                     }
                 }
@@ -417,7 +417,7 @@ async function fetchSchedules() {
 //delete functions
 async function deleteDevice(deviceId) {
     try {
-        const response = await fetch('http://localhost:3000/devices/' + deviceId, {
+        const response = await fetch(url+'/devices/' + deviceId, {
             method: 'DELETE',
         });
         
@@ -435,7 +435,7 @@ async function deleteDevice(deviceId) {
 }
 async function deleteAd(id) {
     try {
-        const response = await fetch('http://localhost:3000/ads/' + id, {
+        const response = await fetch(url+'/ads/' + id, {
             method: 'DELETE',
         });
         
@@ -454,7 +454,7 @@ async function deleteAd(id) {
 }
 async function deleteSchedule(id) {
     try {
-        const response = await fetch('http://localhost:3000/schedules/' + id, {
+        const response = await fetch(url+'/schedules/' + id, {
             method: 'DELETE',
         });
         
@@ -495,7 +495,7 @@ async function addDevice(event) {
 
     // Send to server (optional, adjust API endpoint accordingly)
     try {
-        const response = await fetch('http://localhost:3000/devices/', {
+        const response = await fetch(url+'/devices/', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(newDevice)
@@ -545,7 +545,7 @@ async function addAd(event) {
 
     // Send to server (optional, adjust API endpoint accordingly)
     try {
-        const response = await fetch('http://localhost:3000/ads', {
+        const response = await fetch(url+'/ads', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(adData)
@@ -598,7 +598,7 @@ async function addSchedule(event) {
 
     // Send to server (optional, adjust API endpoint accordingly)
     try {
-        const response = await fetch('http://localhost:3000/schedules', {
+        const response = await fetch(url+'/schedules', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(newSchedule)
@@ -632,7 +632,7 @@ async function uploadAdMedia(id,media) {
 
     try {
         // Send POST request to upload the file
-        const response = await fetch(`http://localhost:3000/ads/media/${id}`, {
+        const response = await fetch(`url+'/ads/media/${id}`, {
             method: 'POST',
             body: formData, // Send FormData directly
         });
@@ -667,7 +667,7 @@ async function editDevice(id) {
             name: name
         };
 
-        const response = await fetch('http://localhost:3000/devices/' + id, {
+        const response = await fetch(url+'/devices/' + id, {
             method: 'PUT',  // Use PUT for updating a resource
             headers: {
                 'Content-Type': 'application/json',
@@ -721,7 +721,7 @@ async function editAd(id) {
 
     // Send to server (optional, adjust API endpoint accordingly)
     try {
-        const response = await fetch('http://localhost:3000/ads/'+id, {
+        const response = await fetch(url+'/ads/'+id, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(adData)
@@ -767,7 +767,7 @@ async function editSchedule(id) {
         };
 
 
-        const response = await fetch('http://localhost:3000/schedules/' + id, {
+        const response = await fetch(url+'/schedules/' + id, {
             method: 'PUT',  // Use PUT for updating a resource
             headers: {
                 'Content-Type': 'application/json',
@@ -925,7 +925,7 @@ async function editScheduleToggleForm(data) {
 //logout -----------------------------------------------------------------------
 async function logout() {
     try {
-        const response = await fetch('http://localhost:3000/logout', {
+        const response = await fetch(url+'/logout', {
             method: 'POST',
             credentials: 'include', // Ensures cookies are sent with the request
         });
@@ -1010,7 +1010,7 @@ function isDateAfter(date1, date2) {
 async function add_ads_in_schedule_droplist(list_id='scheduleAdSelect',selected_ad_id='') {
     try {
         // Fetch data from the server
-        const response = await fetch('http://localhost:3000/ads');
+        const response = await fetch(url+'/ads');
         const ads = await response.json();
 
         // Find the select element
@@ -1045,7 +1045,7 @@ async function add_ads_in_schedule_droplist(list_id='scheduleAdSelect',selected_
 async function add_devices_in_schedule_droplist(list_id='scheduleDeviceSelect',selected_device_id='') {
     try {
         // Fetch data from the server
-        const response = await fetch('http://localhost:3000/devices');
+        const response = await fetch(url+'/devices');
         const devices = await response.json();
 
         // Find the select element
@@ -1091,3 +1091,7 @@ showSection('devices');
 
 
 let isUploading = false; // Flag to track upload state
+
+
+//domain of the server
+url = "adplayforandroidtv-production-13eb.up.railway.app"
