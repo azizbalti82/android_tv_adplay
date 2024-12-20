@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.Toast
 import androidx.fragment.app.FragmentActivity
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
@@ -21,7 +22,9 @@ class MainActivity : FragmentActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        set_connectivity(false)
+        if(data.connected){
+            set_connectivity(false)
+        }
     }
     override fun onBackPressed() {
         // Prevent the app from closing
@@ -32,18 +35,24 @@ class MainActivity : FragmentActivity() {
     override fun onPause() {
         super.onPause()
         //update connectivity status
-        set_connectivity(false)
+        if(data.connected){
+            set_connectivity(false)
+        }
     }
 
     override fun onResume() {
         super.onResume()
-        set_connectivity(true)
+        if(data.connected){
+            set_connectivity(true)
+        }
+
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         bindHome = ActivityMainBinding.inflate(layoutInflater)
         setContentView(bindHome.root)
+
 
         //save bindhome
         data.bindHome = bindHome
@@ -53,23 +62,23 @@ class MainActivity : FragmentActivity() {
 
 
         // rotate the screen to portrait ----------------------
-//        val root: View = bindHome.root
-//        // Get screen dimensions
-//        val displayMetrics = resources.displayMetrics
-//        val height = displayMetrics.heightPixels
-//        val width = displayMetrics.widthPixels
-//        // Swap width and height
-//        root.layoutParams = root.layoutParams.apply {
-//            this.height = width
-//            this.width = height
-//        }
-//        // Set the pivot to the center of the screen
-//        root.pivotX = (height/1.125).toFloat()
-//        root.pivotY = (height/1.125).toFloat()
-//        // Apply rotation
-//        root.rotation = 90f
-//        // Ensure the layout is centered
-//        root.requestLayout()
+        val root: View = bindHome.root
+        // Get screen dimensions
+        val displayMetrics = resources.displayMetrics
+        val height = displayMetrics.heightPixels
+        val width = displayMetrics.widthPixels
+        // Swap width and height
+        root.layoutParams = root.layoutParams.apply {
+            this.height = width
+            this.width = height
+        }
+        // Set the pivot to the center of the screen
+        root.pivotX = (height/1.125).toFloat()
+        root.pivotY = (height/1.125).toFloat()
+        // Apply rotation
+        root.rotation = 90f
+        // Ensure the layout is centered
+        root.requestLayout()
         //-----------------------------------------------------
 
 
@@ -77,8 +86,10 @@ class MainActivity : FragmentActivity() {
         data.apiCalls = ApiCalls()
         data.deviceId = shared.get_id(this)
 
+
         //start the app
         setupApp()
+
     }
 
 
@@ -86,6 +97,7 @@ class MainActivity : FragmentActivity() {
         //start loading animation
         setSection("loading")
         data.apiCalls.isDeviceConnected(data.deviceId) { connected ->
+            data.connected = connected
             if (connected) {
                 setupHome()
             }
@@ -126,7 +138,6 @@ class MainActivity : FragmentActivity() {
                 shared.save_id(this, device.id)
                 data.deviceId = device.id
                 setSection("connect", id = data.deviceId)
-
             } else {
                 // Handle error message
                 Log.e("error_server", message)
@@ -136,9 +147,11 @@ class MainActivity : FragmentActivity() {
     }
     fun get_device_temp() {
         data.apiCalls.getTempDevice(data.deviceId) { message, device ->
+            Log.d("error_server",data.deviceId )
             if (device != null) {
                 // Device exist in the server
                 setSection("connect", id = data.deviceId)
+                Log.d("error_server",data.deviceId )
             } else {
                 // Device does not exist in the server
                 create_device()
@@ -187,6 +200,7 @@ class MainActivity : FragmentActivity() {
                 bindHome.tryAgain.setOnClickListener {
                     setSection("loading")
                     data.apiCalls.isDeviceConnected(data.deviceId) { connected ->
+                        data.connected = connected
                         if (connected) {
                             setupHome()
                         } else {

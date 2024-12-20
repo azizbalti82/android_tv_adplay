@@ -66,6 +66,10 @@ dependencies {
     implementation(libs.dexter)
 
 
+    implementation(libs.android.job)
+
+
+
 
 
 

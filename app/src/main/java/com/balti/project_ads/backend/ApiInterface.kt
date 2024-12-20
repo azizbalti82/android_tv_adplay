@@ -19,7 +19,7 @@ interface ApiInterface {
 
     // Endpoint to get a device temp by ID
     @GET("/temp_devices/{deviceId}")
-    fun getDeviceTemp(@Path("deviceId") deviceId: String): Call<DeviceTemp_content>
+    fun getTempDevice(@Path("deviceId") deviceId: String): Call<DeviceTemp_content>
 
     // Endpoint to get a device by ID
     @GET("/devices/{deviceId}")

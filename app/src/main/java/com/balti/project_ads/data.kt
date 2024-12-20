@@ -34,10 +34,11 @@ import java.util.concurrent.TimeUnit
 class data {
     @SuppressLint("StaticFieldLeak")
     companion object{
-        val url = "http://192.168.1.122:3000"
+        val url = "https://adplayforandroidtv-production-13eb.up.railway.app/"
         lateinit var bindHome: ActivityMainBinding
         lateinit var deviceId: String
         lateinit var apiCalls: ApiCalls
+        var connected = false
         //for exo player
         private lateinit var player: ExoPlayer
 
@@ -45,151 +46,6 @@ class data {
             // Initialize the player
             player = ExoPlayer.Builder(c).build()
         }
-        /* second version
-        fun showMedia(context: Context, mediaType: String, uri: Uri?) {
-            // Stop and release the player if it already exists
-            if (::player.isInitialized) {
-                player.stop()
-                player.release()
-            }
-
-            // Reinitialize the Player
-            player = ExoPlayer.Builder(context).build()
-
-            // Hide all media views initially
-            bindHome.mediaAudio.cancelAnimation()
-            bindHome.mediaImage.visibility = View.GONE
-            bindHome.mediaAudio.visibility = View.GONE
-            bindHome.mediaVideo.visibility = View.GONE
-            bindHome.noMedia.visibility = View.GONE
-
-            when (mediaType.lowercase()) {
-                "image" -> {
-                    bindHome.mediaImage.visibility = View.VISIBLE
-                    // Show image
-                    Glide.with(context)
-                        .load(uri) // URI of the image
-                        .into(bindHome.mediaImage)
-                }
-                "video" -> {
-                    // Show the ExoPlayer view
-                    bindHome.mediaVideo.visibility = View.VISIBLE
-                    bindHome.mediaVideo.player = player
-
-                    // Disable controls (ensure that 'useController' is false)
-                    bindHome.mediaVideo.useController = false
-
-                    val mediaItem = uri?.let { MediaItem.fromUri(it) }
-
-                    // Create media source using CacheDataSourceFactory
-                    mediaItem?.let {
-                        val mediaSource = ProgressiveMediaSource.Factory(cacheDataSourceFactory)
-                            .createMediaSource(it)
-
-                        // Set the media source to ExoPlayer
-                        player.setMediaSource(mediaSource)
-                    }
-
-                    // Set repeat mode (repeat the media)
-                    player.repeatMode = Player.REPEAT_MODE_ONE
-                    player.prepare()
-                    player.play()
-                }
-                "music" -> {
-                    // Show the audio view
-                    bindHome.mediaAudio.visibility = View.VISIBLE
-                    bindHome.mediaAudio.playAnimation()
-
-                    // Play audio using ExoPlayer
-                    val mediaItem = uri?.let { MediaItem.fromUri(it) }
-
-                    mediaItem?.let {
-                        val mediaSource = ProgressiveMediaSource.Factory(cacheDataSourceFactory)
-                            .createMediaSource(it)
-
-                        // Set the media source to ExoPlayer
-                        player.setMediaSource(mediaSource)
-                        player.repeatMode = Player.REPEAT_MODE_ONE
-                        bindHome.mediaVideo.useController = false
-                        player.prepare()
-                        player.play()
-                    }
-                }
-                else -> {
-                    // Show the "no media" page
-                    bindHome.noMedia.visibility = View.VISIBLE
-                }
-            }
-        }
-         */
-        /*first version
-        fun showMedia(context: Context, mediaType: String, uri: Uri?) {
-            // Stop and release the player if it already exists
-            if (::player.isInitialized) {
-                player.stop()
-                player.release()
-            }
-            //reinitialize the Player
-            player = ExoPlayer.Builder(context).build()
-            //first hide all media views
-            bindHome.mediaAudio.cancelAnimation()
-            bindHome.mediaImage.visibility = View.GONE
-            bindHome.mediaAudio.visibility = View.GONE
-            bindHome.mediaVideo.visibility = View.GONE
-            bindHome.noMedia.visibility = View.GONE
-
-            when (mediaType.lowercase()) {
-                "image" -> {
-                    bindHome.mediaImage.visibility = View.VISIBLE
-                    // Show image
-                    Glide.with(context)
-                        .load(uri) // URI of the image
-                        .into(bindHome.mediaImage)
-
-                }
-                "video" -> {
-                    //show the exoplayer view
-                    bindHome.mediaVideo.visibility = View.VISIBLE
-                    // Play audio using ExoPlayer
-                    bindHome.mediaVideo.player = player
-
-                    // Disable controls (ensure that 'useController' is false)
-                    bindHome.mediaVideo.useController = false
-
-                    val mediaItem = uri?.let { MediaItem.fromUri(it) }
-                    if (mediaItem != null) {
-                        player.setMediaItem(mediaItem)
-                    }
-
-                    // Set repeat mode (repeat the media)
-                    player.repeatMode = Player.REPEAT_MODE_ONE
-                    player.prepare()
-                    player.play()
-
-                }
-                "music" -> {
-                    //show the exoplayer view
-                    bindHome.mediaAudio.visibility = View.VISIBLE
-                    bindHome.mediaAudio.playAnimation()
-                    // Play audio using ExoPlayer
-                    val mediaItem = uri?.let { MediaItem.fromUri(it) }
-
-                    if (mediaItem != null) {
-                        player.setMediaItem(mediaItem)
-                        player.repeatMode = Player.REPEAT_MODE_ONE
-                        bindHome.mediaVideo.useController = false
-                        player.prepare()
-                        player.play()
-                    }
-                }
-                else -> {
-                    //show empty page
-                    bindHome.noMedia.visibility = View.VISIBLE
-                }
-            }
-        }
-
-         */
 
         //deal with media
         suspend fun downloadMedia(context: Context, mediaUrl: String, mediaName: String): Boolean {
@@ -349,17 +205,21 @@ class data {
                                 //1) get the media type from the ad
                                 apiCalls.getMediaTypeFromAd(s.ad_id!!) { type ->
                                     if (type != null) {
-                                        //now when we got the ad : start scheduling it
-                                        data.scheduleAd(c,s.ad_id!!,type,s.start!!,s.end!!)
+                                        //2) save media in the storage for offline consulting (if that ads media not already saved)
+                                        //each media saved in the storage with the name equals to ad_id
+                                        GlobalScope.launch {
+                                            val result = downloadMedia(c,data.url + "media/" + s.ad_id,s.ad_id.toString())
+                                            if(result){
+                                                //now when we got the ad : start scheduling it
+                                                scheduleAd(c,s.ad_id!!,type,s.start!!,s.end!!)
+                                                Log.d("storage", "downloaded successfully")
+                                            }else{
+                                                Log.d("storage", "download Error")
+                                            }
+                                        }
                                     } else {
-                                        // there is no schedules
-                                        Toast.makeText(c, "Error while loading ad type", Toast.LENGTH_SHORT).show()
+                                        // unable to extract that media type
                                     }
-                                }
-                                //2) save media in the storage for offline consulting (if that ads media not already saved)
-                                //each media saved in the storage with the name equals to ad_id
-                                GlobalScope.launch {
-                                    downloadMedia(c,data.url + "/ads/media/" + s.ad_id,s.ad_id.toString())
                                 }
                             }
                         }
@@ -375,8 +235,10 @@ class data {
             val currentTime = System.currentTimeMillis()
             Log.d("ActionWorker", "ad type: ${mediaType}")
 
-            val delay_to_start: Long = (startTime.time+3600000L) - currentTime
-            val delay_to_end: Long = (endTime.time+3600000L) - currentTime
+            val one_houre = 3600000L
+
+            val delay_to_start: Long = (startTime.time/*+one_houre*/) - currentTime
+            val delay_to_end: Long = (endTime.time/*+one_houre*/) - currentTime
 
             val still_valid = delay_to_end > 0
 

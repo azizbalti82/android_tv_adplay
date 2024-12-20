@@ -49,13 +49,12 @@ class ApiCalls {
 
             override fun onFailure(call: Call<DeviceTemp>, t: Throwable) {
                 // Handle network or other failures
-                Log.e(TAG, t.message.toString())
-                callback("Network error: ${t.message}", null)
+                callback("Network error (create temp device): ${t.message}", null)
             }
         })
     }
     fun getTempDevice(deviceId: String, callback: (String, DeviceTemp_content?) -> Unit) {
-        val call = Api.getDeviceTemp(deviceId)
+        val call = Api.getTempDevice(deviceId)
         call.enqueue(object : Callback<DeviceTemp_content> {
             override fun onResponse(call: Call<DeviceTemp_content>, response: Response<DeviceTemp_content>) {
                 if (response.isSuccessful) {
@@ -67,7 +66,7 @@ class ApiCalls {
             }
             override fun onFailure(call: Call<DeviceTemp_content>, t: Throwable) {
                 Log.e(TAG, t.message.toString())
-                callback("Network error: ${t.message}", null)
+                callback("Network error (get temp device) : ${t.message}", null)
             }
         })
     }
@@ -78,12 +77,12 @@ class ApiCalls {
         call.enqueue(object : Callback<Device> {
             override fun onResponse(call: Call<Device>, response: Response<Device>) {
                 // If the device exists, it's considered connected
-                Log.e(TAG, response.message())
+                Log.e(TAG, "device connected")
                 callback(response.isSuccessful)
             }
 
             override fun onFailure(call: Call<Device>, t: Throwable) {
-                Log.e(TAG, t.message.toString())
+                Log.e(TAG, "error checking device connectivity")
                 callback(false)
             }
         })
@@ -103,13 +102,13 @@ class ApiCalls {
                         callback(null)
                     }
                 } else {
-                    Log.e(TAG, "Failed to fetch device: ${response.message()}")
+                    Log.e(TAG, "Failed to fetch device")
                     callback(null)
                 }
             }
 
             override fun onFailure(call: Call<Device>, t: Throwable) {
-                Log.e(TAG, "Network error: ${t.message}")
+                Log.e(TAG, "Network error (get device): ${t.message}")
                 callback(null)
             }
         })
@@ -122,7 +121,7 @@ class ApiCalls {
                 if (p1.isSuccessful && p1.body() != null) {
                     callback(true)
                 } else {
-                    Log.e(TAG, p1.message())
+                    Log.e(TAG, "updated device successfully: "+p1.message())
                     callback(false)
                 }
             }
@@ -160,7 +159,7 @@ class ApiCalls {
 
     // crud for ads
     fun getMediaTypeFromAd(adId: String, callback: (String?) -> Any) {
-        Api.getAd(adId)?.enqueue(object : Callback<Ad> {
+        Api.getAd(adId).enqueue(object : Callback<Ad> {
             override fun onResponse(p0: Call<Ad>, p1: Response<Ad>) {
                 if (p1.isSuccessful) {
                     val ad = p1.body()
@@ -171,6 +170,7 @@ class ApiCalls {
                     callback(null)
                 }
             }
+
             override fun onFailure(p0: Call<Ad>, p1: Throwable) {
                 Log.e(TAG, "error in getting ad type" + p1.message)
                 callback(null)
