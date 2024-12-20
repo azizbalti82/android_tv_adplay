@@ -1,3 +1,9 @@
+//domain of the server
+var url = "https://adplayforandroidtv-production-13eb.up.railway.app"
+
+
+
+
 // Function to fetch data and update the table
 async function fetchDevices(section) {
     try {
@@ -1092,6 +1098,3 @@ showSection('devices');
 
 let isUploading = false; // Flag to track upload state
 
-
-//domain of the server
-url = "adplayforandroidtv-production-13eb.up.railway.app"
