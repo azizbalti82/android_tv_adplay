@@ -83,20 +83,6 @@
                 android:text="There is no Ads at this moment"
                 android:textColor="@color/textSecondary"
                 android:textSize="18sp" />
-
-            <Button
-                android:id="@+id/refrech"
-                android:layout_width="100dp"
-                android:layout_height="40dp"
-                android:layout_marginTop="30dp"
-                android:background="@drawable/button_filled_black"
-                android:backgroundTint="@null"
-                android:padding="10dp"
-                android:text="Refrech"
-                android:textAlignment="center"
-                android:textAllCaps="false"
-                android:textColor="@color/background"
-                android:textSize="15sp" />
         </LinearLayout>
 
         <!-- video view -->

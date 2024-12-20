@@ -59,6 +59,13 @@ dependencies {
     //to schedule tasks
     implementation(libs.androidx.work.runtime.ktx)
 
+    //for asynchronous
+    implementation(libs.kotlinx.coroutines.android)
+
+    //for permissions management
+    implementation(libs.dexter)
+
+
 
 
 

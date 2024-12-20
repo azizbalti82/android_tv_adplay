@@ -1,25 +1,22 @@
 package com.balti.project_ads
 
-
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.widget.Toast
 import androidx.fragment.app.FragmentActivity
-import androidx.work.Data
-import androidx.work.OneTimeWorkRequest
+import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.balti.project_ads.backend.ApiCalls
 import com.balti.project_ads.backend.models.Status
 import com.balti.project_ads.backend.shared
 import com.balti.project_ads.databinding.ActivityMainBinding
-import java.util.Date
+import com.balti.project_ads.workers.FetchSchedules
 import java.util.concurrent.TimeUnit
+
 
 class MainActivity : FragmentActivity() {
     private lateinit var bindHome: ActivityMainBinding
-    private lateinit var deviceId: String
-    private lateinit var apiCalls:ApiCalls
     private val TAG = "MainActivity"
 
     override fun onDestroy() {
@@ -54,35 +51,31 @@ class MainActivity : FragmentActivity() {
         //initialise the media player
         data.initializeExoPlayer(this)
 
-        //listeners
-        bindHome.refrech.setOnClickListener {
-            get_schdules(deviceId)
-        }
 
         // rotate the screen to portrait ----------------------
-        val root: View = bindHome.root
-        // Get screen dimensions
-        val displayMetrics = resources.displayMetrics
-        val height = displayMetrics.heightPixels
-        val width = displayMetrics.widthPixels
-        // Swap width and height
-        root.layoutParams = root.layoutParams.apply {
-            this.height = width
-            this.width = height
-        }
-        // Set the pivot to the center of the screen
-        root.pivotX = (height/1.125).toFloat()
-        root.pivotY = (height/1.125).toFloat()
-        // Apply rotation
-        root.rotation = 90f
-        // Ensure the layout is centered
-        root.requestLayout()
+//        val root: View = bindHome.root
+//        // Get screen dimensions
+//        val displayMetrics = resources.displayMetrics
+//        val height = displayMetrics.heightPixels
+//        val width = displayMetrics.widthPixels
+//        // Swap width and height
+//        root.layoutParams = root.layoutParams.apply {
+//            this.height = width
+//            this.width = height
+//        }
+//        // Set the pivot to the center of the screen
+//        root.pivotX = (height/1.125).toFloat()
+//        root.pivotY = (height/1.125).toFloat()
+//        // Apply rotation
+//        root.rotation = 90f
+//        // Ensure the layout is centered
+//        root.requestLayout()
         //-----------------------------------------------------
 
 
         // Logic for device connection
-        apiCalls = ApiCalls()
-        deviceId = shared.get_id(this)
+        data.apiCalls = ApiCalls()
+        data.deviceId = shared.get_id(this)
 
         //start the app
         setupApp()
@@ -91,15 +84,15 @@ class MainActivity : FragmentActivity() {
 
     private fun setupApp(){
         //start loading animation
-        show_loading()
-        apiCalls.isDeviceConnected(deviceId) { connected ->
-            if (connected /*replace true with 'connected'*/) {
+        setSection("loading")
+        data.apiCalls.isDeviceConnected(data.deviceId) { connected ->
+            if (connected) {
                 setupHome()
             }
             else {
                 //device not added to server
                 //check if there is a temp device in android
-                if(deviceId!=""){
+                if(data.deviceId!=""){
                     //there is a temp device, check if its still valid in server
                     get_device_temp()
                 }
@@ -115,51 +108,37 @@ class MainActivity : FragmentActivity() {
         set_connectivity(true)
 
         //if device added to server
-        show_home_section()
+        setSection("home")
 
-        //get schedule of this device
-        get_schdules(deviceId)
+        //setup a worker to fetch schedules for every 12h
+        FetchSchedulesWorker(this)
 
-
-
-        //if there are new ads, download their media
-
-
-        //start the scheduling of the ads with WorkManager
-
-
-
-
-//        val urlImageString = "https://pics.craiyon.com/2023-09-28/84df15a1a9ca4520b32c3631d097ecd2.webp"
-//        val urlAudioString = "https://www.sousound.com/music/healing/healing_01.mp3"
-//        val urlVideoString = "https://tekeye.uk/html/images/Joren_Falls_Izu_Jap.mp4"
-//        val uri = Uri.parse(urlAudioString)
-//
-          //showMedia(this, "music", uri)
+        //show empty ads until the a new schedule fetching accurs
+        //data.bindHome.noMedia.visibility = View.VISIBLE
+        data.get_schdules(this,data.deviceId)
     }
 
     //api functions ---------------------------------------------
     fun create_device() {
-        apiCalls.createTempDevice { message, device ->
-            Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
-
+        data.apiCalls.createTempDevice { message, device ->
             if (device != null) {
                 // Device céreation successful
                 shared.save_id(this, device.id)
-                deviceId = device.id
-                show_connect_section(device.id)
+                data.deviceId = device.id
+                setSection("connect", id = data.deviceId)
+
             } else {
                 // Handle error message
                 Log.e("error_server", message)
-                show_offline_section("create_temp_device")
+                setSection("offline")
             }
         }
     }
     fun get_device_temp() {
-        apiCalls.getTempDevice(deviceId) { message, device ->
+        data.apiCalls.getTempDevice(data.deviceId) { message, device ->
             if (device != null) {
                 // Device exist in the server
-                show_connect_section(deviceId)
+                setSection("connect", id = data.deviceId)
             } else {
                 // Device does not exist in the server
                 create_device()
@@ -169,7 +148,7 @@ class MainActivity : FragmentActivity() {
         }
     }
     fun set_connectivity(connected: Boolean) {
-        apiCalls.getDevice(deviceId) { device ->
+        data.apiCalls.getDevice(data.deviceId) { device ->
             //Toast.makeText(this, device.toString(), Toast.LENGTH_SHORT).show()
             if (device != null) {
                 device.Device.name.let { Log.d("error_", it) }
@@ -183,7 +162,7 @@ class MainActivity : FragmentActivity() {
                 //update device in server
                 device.Device.id.let { id->
                     val new_device = Status(status = device.Device.status)
-                    apiCalls.updateDevice(id,new_device) { is_updated ->
+                    data.apiCalls.updateDevice(id,new_device) { is_updated ->
                         if (is_updated) {
                             // Device update successful
                             Log.d("error","error while updating status")
@@ -193,129 +172,65 @@ class MainActivity : FragmentActivity() {
             }
         }
     }
-    fun get_schdules(deviceId: String) {
-        //first thing : show there is no ads for this moment
-        data.showMedia(this, "",null)
-        //now schedule ads (if they exist)
-        apiCalls.getSchedulesByDeviceId(deviceId) { schedules ->
-            if (schedules != null) {
-                // we got schedules
-                if(schedules.isEmpty()){
-                    //see if there are new ads
-                    data.showMedia(this, "",null)
-                }else{
-                    //there are some schedules:
-                    //1) schedule them
-                    for(s in schedules){
-                        //get the media type from the ad
-                        if(s!=null){
-                            apiCalls.getMediaTypeFromAd(s.ad_id!!) { type ->
-                                if (type != null) {
-                                    scheduleAd(s.ad_id!!,type,s.start!!,s.end!!)
-                                } else {
-                                    // there is no schedules
-                                    Toast.makeText(this, "Error while loading ad type", Toast.LENGTH_SHORT).show()
-                                }
-                            }
-                        }
-                    }
-
-                    //2) save ads in the storage for offline consulting (if the ads not already saved)
-                }
-            } else {
-                // there is no schedules
-                Toast.makeText(this, "Error while loading schedules", Toast.LENGTH_SHORT).show()
-
-            }
-        }
-    }
-
 
     //ui functions ----------------------------------------------
-    fun show_offline_section(message: String){
+    fun setSection(sectionName: String, id: String? = null) {
+        // Reset visibility for all sections
         bindHome.loading.visibility = View.GONE
         bindHome.containerConnect.visibility = View.GONE
-        bindHome.offlineContainer.visibility = View.VISIBLE
+        bindHome.offlineContainer.visibility = View.GONE
         bindHome.containerHome.visibility = View.GONE
 
-        bindHome.tryAgain.setOnClickListener {
-            show_loading()
-            apiCalls.isDeviceConnected(deviceId) { connected ->
-                if (connected) {
-                    setupHome()
-                } else {
-                    if(message=="create_temp_device"){
-                        create_device()
+        when (sectionName) {
+            "offline" -> {
+                bindHome.offlineContainer.visibility = View.VISIBLE
+                bindHome.tryAgain.setOnClickListener {
+                    setSection("loading")
+                    data.apiCalls.isDeviceConnected(data.deviceId) { connected ->
+                        if (connected) {
+                            setupHome()
+                        } else {
+                            create_device()
+                        }
                     }
                 }
             }
+            "connect" -> {
+                bindHome.containerConnect.visibility = View.VISIBLE
+                if (!id.isNullOrEmpty()) {
+                    bindHome.codeText.text = id
+                }
+                bindHome.continueBtn.setOnClickListener {
+                    bindHome.containerConnect.visibility = View.GONE
+                    setupApp()
+                }
+            }
+            "home" -> {
+                bindHome.containerHome.visibility = View.VISIBLE
+            }
+            "loading" -> {
+                bindHome.loading.visibility = View.VISIBLE
+            }
+            else -> {
+                throw IllegalArgumentException("Invalid section name: $sectionName")
+            }
         }
-    }
-    fun show_connect_section(id: String) {
-        bindHome.codeText.text = id
-        bindHome.loading.visibility = View.GONE
-        bindHome.containerConnect.visibility = View.VISIBLE
-        bindHome.offlineContainer.visibility = View.GONE
-        bindHome.containerHome.visibility = View.GONE
-
-        bindHome.continueBtn.setOnClickListener {
-            bindHome.containerConnect.visibility = View.GONE
-            setupApp()
-        }
-    }
-    fun show_home_section(){
-        bindHome.loading.visibility = View.GONE
-        bindHome.containerConnect.visibility = View.GONE
-        bindHome.offlineContainer.visibility = View.GONE
-        bindHome.containerHome.visibility = View.VISIBLE
-    }
-    fun show_loading(){
-        bindHome.loading.visibility = View.VISIBLE
-        bindHome.containerConnect.visibility = View.GONE
-        bindHome.offlineContainer.visibility = View.GONE
-        bindHome.containerHome.visibility = View.GONE
     }
 
     // functionality ---------------------------------------------
-    private fun scheduleAd(adId: String,mediaType:String, startTime: Date, endTime: Date) {
-        // Calculate delay in milliseconds
-        val currentTime = System.currentTimeMillis()
-        Log.d("ActionWorker", "ad type: ${mediaType}")
+    fun FetchSchedulesWorker(context: Context) {
+        //fetch schedules every 12h
+        val workRequest = PeriodicWorkRequestBuilder<FetchSchedules>(
+            15, TimeUnit.MINUTES // Repeat interval
+        ).build()
 
-        val delay_to_start: Long = (startTime.time+3600000L) - currentTime
-        val delay_to_end: Long = (endTime.time+3600000L) - currentTime
-
-        val still_valid = delay_to_end > 0
-
-        // Check if the delay is positive (i.e., scheduled time is in the future)
-        if (still_valid) {
-            //save when the ad will start
-            add_to_worked(adId,mediaType,delay_to_start)
-            //save when the ad will end
-            add_to_worked(adId,"",delay_to_end)
-        } else {
-            // If the scheduled time has already passed, do nothing
-            Log.d("ActionWorker", "Scheduled time has already passed. Action not scheduled.")
-        }
+        // Enqueue the periodic work
+        WorkManager.getInstance(context).enqueueUniquePeriodicWork(
+            "My12HourTask",
+            androidx.work.ExistingPeriodicWorkPolicy.KEEP, // Prevents creating duplicates
+            workRequest
+        )
     }
-    fun add_to_worked(adId: String,mediaType_:String,delay:Long){
-        // Prepare input data for the Worker
-        val inputData: Data = Data.Builder()
-            .putString("id", adId)
-            .putString("mediaType", mediaType_)
-            .build()
-
-        // Create a OneTimeWorkRequest with a delay
-        val workRequest: OneTimeWorkRequest = OneTimeWorkRequest.Builder(ActionWorker::class.java)
-            .setInitialDelay(delay, TimeUnit.MILLISECONDS)
-            .setInputData(inputData)
-            .build()
-
-        // Schedule the work
-        WorkManager.getInstance(this).enqueue(workRequest)
-        Log.d("ActionWorker", "Work scheduled successfully.")
-    }
-
 }
 
 
