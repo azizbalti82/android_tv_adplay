@@ -316,7 +316,7 @@ async function fetchSchedules() {
                     // Split the concatenated string into individual ad IDs
                     const adIds = schedule.ad_id.split(';');
                     
-                    ads = []
+                    const ads = []
                     for (const ad of adIds) {
                         ads.push(ad)
                     }
