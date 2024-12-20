@@ -317,7 +317,7 @@ async function fetchSchedules() {
                     const ad = adsMap[schedule.ad_id];
                     const device = devicesMap[schedule.device_id];
 
-                    console.log(ad)
+                    console.log('ad for this schedule are: '+ad)
                     
                     // Populate the table row
                     const ad_id = document.createElement('td');
