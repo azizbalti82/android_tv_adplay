@@ -1088,15 +1088,18 @@ async function add_devices_in_schedule_droplist(list_id='scheduleDeviceSelect',s
 async function addAnotherAd() {
     const adContainer = document.getElementById("ads_of_schedule");
 
+    // Count existing selects to assign a unique ID
+    const selectCount = adContainer.querySelectorAll("select").length;
+
     // Create a new select element
     const newSelect = document.createElement("select");
     newSelect.classList.add("form-control");
     newSelect.innerHTML = '';
-    newSelect.id = 'scheduleAdSelect'
+    newSelect.id = 'scheduleAdSelect'+selectCount
     newSelect.style.marginTop = "5px";
     newSelect.style.marginBottom = "5px";
 
-    await add_ads_in_schedule_droplist('scheduleAdSelect','')
+    await add_ads_in_schedule_droplist(list_id='scheduleAdSelect'+selectCount)
 
     // Insert the new select element before the "Add Another Ad" button
     const addButton = adContainer.querySelector("#the_ad_add_button_to_schedule");
