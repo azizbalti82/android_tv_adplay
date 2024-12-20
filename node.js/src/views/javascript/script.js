@@ -1096,7 +1096,7 @@ async function addAnotherAd() {
     newSelect.style.marginTop = "5px";
     newSelect.style.marginBottom = "5px";
 
-    await add_ads_in_schedule_droplist('','')
+    await add_ads_in_schedule_droplist('scheduleAdSelect','')
 
     // Insert the new select element before the "Add Another Ad" button
     const addButton = adContainer.querySelector("#the_ad_add_button_to_schedule");
