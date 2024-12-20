@@ -32,7 +32,9 @@ app.use('/javascript', express.static(path.join(__dirname, 'views', 'javascript'
 app.use('/images', express.static(path.join(__dirname, 'views', 'images')));
 
 // MongoDB connection
-mongoose.connect('mongodb://localhost:27017/ad_management', {})
+const MONGO_URI = "mongodb://mongo:hSjBsOKjnZYHdUUVEXUDUCEMZSCApjDd@junction.proxy.rlwy.net:28709";
+
+mongoose.connect(MONGO_URI, {})
 .then(() => console.log('Connected to MongoDB'))
 .catch((err) => console.error('Error connecting to MongoDB:', err));
 

@@ -359,11 +359,15 @@ async function fetchSchedules() {
 
 
                     const tools = document.createElement('td');
+                    //i removed edit button , return it if needed due to its multiple bugs
                     const editButton = document.createElement('button');
                     editButton.textContent = 'Edit';
                     editButton.onclick = () => editScheduleToggleForm(schedule); // Edit functionality
                     editButton.classList.add('btn', 'btn-primary');
                     editButton.style.marginRight = '5px';
+                    editButton.style.display = 'none';  // Hides the button
+
+                
 
                     const deleteButton = document.createElement('button');
                     deleteButton.textContent = 'Delete';
