@@ -233,16 +233,23 @@
                     <div id="scheduleForm" class="form-container mb-5">
                         <h4>Add Schedule</h4>
                         <form onsubmit="return addSchedule(event)">
-                            <div class="form-group">
+
+                            <div class="form-group" id="ads_of_schedule">
                                 <label for="scheduleAdSelect">Ad</label>
                                 <select class="form-control" id="scheduleAdSelect">
                                 </select>
+                                <button type="button" class="btn btn-link addAdButton" id="the_ad_add_button_to_schedule" onclick="addAnotherAd()">+ Add Another Ad</button>
                             </div>
+
+
+
+    
                             <div class="form-group">
                                 <label for="scheduleDeviceSelect">Device</label>
                                 <select class="form-control" id="scheduleDeviceSelect">
                                 </select>
                             </div>
+
                             <div class="form-group">
                                 <label for="scheduleStartInput">Start Time</label>
                                 <input type="datetime-local" class="form-control" id="scheduleStartInput">
