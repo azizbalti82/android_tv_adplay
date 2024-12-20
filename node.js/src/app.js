@@ -9,6 +9,7 @@ const routDeviceTemp = require('./routes/routeDeviceTemp')
 const routAd = require('./routes/routeAd')
 const routSchedule = require('./routes/routeSchedule')
 const routLogin = require('./routes/routeLogin')
+const routMedia = require('./routes/routeMedia')
 
 //initialisation ---------------------------------------------------------------------------------------------------
 //inisialise server
@@ -57,6 +58,7 @@ app.use(routAd);
 app.use(routSchedule);
 app.use(routDeviceTemp);
 app.use(routLogin);
+app.use(routMedia);
 
 //root route
 app.get('', (req, res) => {

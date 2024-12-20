@@ -1,6 +1,8 @@
 const Ad = require('../models/modelAd');
 const { generateAdId } = require('../utils/generateID');
 const path = require('path'); // Import path module to handle file extensions
+const mongoose = require('mongoose');
+const Grid = require('gridfs-stream');
 
 // Controller to create a new ad
 const create_ad = async (req, res) => {
@@ -74,7 +76,7 @@ const delete_ad = async (req, res) => {
 };
 
 
-
+/*
 // Controller to upload a media file
 
 const upload_media = async (req, res) => {
@@ -143,6 +145,7 @@ const get_media = async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 };
+*/
 
 
 
@@ -151,6 +154,4 @@ module.exports = {
     getAll_ad,
     update_ad,
     delete_ad,
-    upload_media,
-    get_media,
 };

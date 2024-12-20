@@ -549,7 +549,7 @@ async function addAd(event) {
 
     console.error(adData);
 
-    // Send to server (optional, adjust API endpoint accordingly)
+    // save the ad in server
     try {
         const response = await fetch(url+'/ads', {
             method: 'POST',
@@ -625,7 +625,7 @@ async function addSchedule(event) {
         showSection('schedule')
     }
 }
-async function uploadAdMedia(id,media) {
+async function uploadAdMedia(id, media) {
     // Validation
     if (!id || !media) {
         alert('Please provide both Ad ID and media file.');
@@ -634,17 +634,18 @@ async function uploadAdMedia(id,media) {
 
     // Create FormData to handle file upload
     const formData = new FormData();
-    formData.append('upload_media', media); // 'upload_media' matches the field in `upload.single()`
+    formData.append('file', media); // 'file' matches the field in `upload.single()`
 
     try {
         // Send POST request to upload the file
-        const response = await fetch(`url+'/ads/media/${id}`, {
+        const response = await fetch(url+'/media/${id}', { // Adjusted URL to match the new route
             method: 'POST',
             body: formData, // Send FormData directly
         });
 
         if (response.ok) {
-            alert('Media uploaded successfully!');
+            const result = await response.json();
+            alert(`Media uploaded successfully! Media ID: ${result.mediaId}`);
         } else {
             const error = await response.json();
             alert(`Failed to upload media: ${error.message}`);
@@ -654,6 +655,7 @@ async function uploadAdMedia(id,media) {
         alert('An error occurred during upload.');
     }
 }
+
 
 
 

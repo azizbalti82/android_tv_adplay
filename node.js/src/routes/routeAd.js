@@ -5,16 +5,16 @@ const Ad = require('../models/modelAd');
 const multer = require('multer')
 
 
+/*
 const upload=multer({
     dest : 'media'
 })
-
 
 // Route to upload images:
 router.post('/ads/media/:adId',upload.single('upload_media'),controllerAd.upload_media)
 // Route to get media for an ad:
 router.get('/ads/media/:adId', controllerAd.get_media);
-
+*/
 
 
 // Route to get all ads
