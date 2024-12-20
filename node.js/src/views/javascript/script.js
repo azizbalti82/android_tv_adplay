@@ -331,7 +331,12 @@ async function fetchSchedules() {
                     
                     // Populate the table row
                     const ad_id = document.createElement('td');
-                    ad_id.textContent = ad.title+' and '+(ads.length - 1)+' more';
+                    if(ads.length >1){
+                        ad_id.textContent = ad.title+' and '+(ads.length - 1)+' more';
+                    }else{
+                        ad_id.textContent = ad.title;
+                    }
+                    
                     row.appendChild(ad_id);
                 
 
