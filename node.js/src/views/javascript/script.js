@@ -576,11 +576,12 @@ async function addSchedule(event) {
     event.preventDefault(); // Prevent form default submission behavior
 
     // Extract data from the form
-    const adId = document.getElementById('scheduleAdSelect').value;
+    const adId = collectSelectedAdIds() 
     const deviceId = document.getElementById('scheduleDeviceSelect').value;
     const startTime = document.getElementById('scheduleStartInput').value;
     const endTime = document.getElementById('scheduleEndInput').value;
 
+    console.log(adId)
     // Validation (optional)
     if (!adId || !deviceId || !startTime || !endTime) {
         alert('Please fill in all fields');
@@ -1105,6 +1106,19 @@ async function addAnotherAd() {
 
     await add_ads_in_schedule_droplist(list_id='scheduleAdSelect'+selectCount)
 }
+function collectSelectedAdIds(containerId = 'ads_of_schedule') {
+    const adContainer = document.getElementById(containerId);
+    const selectElements = adContainer.querySelectorAll('select');
+    
+    // Collect selected values
+    const selectedIds = Array.from(selectElements)
+        .map(select => select.value) // Get the value of each selected option
+        .filter(value => value); // Filter out empty values (in case nothing is selected)
+
+    // Join selected IDs with a semicolon
+    return selectedIds.join(';');
+}
+
 
 //-----------------------------------------------------------------------------------------------------
 // Show "Devices" section on load
