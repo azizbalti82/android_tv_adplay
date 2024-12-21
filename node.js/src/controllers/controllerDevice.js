@@ -1,5 +1,6 @@
 const Device = require('../models/modelDevice');
 const DeviceTemp = require('../models/modelDeviceTemp');
+const Schedule = require('../models/modelSchedule');
 
 
 // Controller to create a new device
@@ -102,8 +103,11 @@ const deleteDevice = async (req, res) => {
         if (!deletedDevice) {
             return res.status(404).json({ message: 'Device not found' });
         }
-
         res.status(200).json({ message: 'Device deleted successfully' });
+
+        // When a device is deleted, also delete all schedules related to it
+        const deletedSchedules = await Schedule.deleteMany({ device_id: deviceId });
+        console.log(`${deletedSchedules.deletedCount} schedules deleted for device ID: ${deviceId}`);
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Server error' });
