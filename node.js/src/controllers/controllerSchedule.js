@@ -19,6 +19,7 @@ const create_schedule = async (req, res) => {
         }
         // Check for conflicting schedules: the period of showing this schedule already taken by other schedule for this device
         // deviceid==this_device_id && start_this>=start_other && end_this<=end_other
+        console.log("add schedule: selected device="+req.body.device_id)
         const conflictingSchedules = await Schedule.find({
             device_id: req.body.device_id,
             $or: [
