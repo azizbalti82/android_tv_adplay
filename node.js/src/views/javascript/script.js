@@ -741,17 +741,11 @@ async function editAd(id) {
 
         if (response.ok) {
             alert('ad added successfully!');
-
-            if(media){
-                const data = await response.json();
-                uploadAdMedia(data.ad.id,media)
-            }
         } else {
             alert('Failed to update ad.');
         }
     } catch (error) {
         console.error('Error updating ad:', error);
-        alert('An error occurred.');
     } finally{
         showSection('ads')
     }
