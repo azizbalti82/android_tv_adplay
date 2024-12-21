@@ -996,6 +996,19 @@ function showSection(section) {
 function toggleForm(formId) {
     const form = document.getElementById(formId);
     form.style.display = form.style.display === 'block' ? 'none' : 'block';
+    resetAdsOfSchedule();
+}
+async function resetAdsOfSchedule() {
+    const adsOfSchedule = document.getElementById("ads_of_schedule");
+    adsOfSchedule.outerHTML = `
+        <div class="form-group" id="ads_of_schedule">
+            <label for="scheduleAdSelect">Ad</label>
+            <select class="form-control" id="scheduleAdSelect">
+            </select>
+            <button type="button" class="btn btn-link addAdButton" id="the_ad_add_button_to_schedule" onclick="addAnotherAd()">+ Add Another Ad</button>
+        </div>
+    `;
+    await add_ads_in_schedule_droplist()
 }
 function hideAllForms() {
     document.querySelectorAll('.form-container').forEach(form => {
