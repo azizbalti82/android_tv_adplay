@@ -3,11 +3,8 @@ package com.balti.project_ads
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Matrix
-import android.icu.text.Transliterator.Position
 import android.net.Uri
 import android.os.CountDownTimer
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import android.view.TextureView
 import android.view.View
@@ -20,7 +17,6 @@ import com.balti.project_ads.backend.models.AdGroupItem
 import com.balti.project_ads.databinding.ActivityMainBinding
 import com.balti.project_ads.workers.ActionWorker
 import com.bumptech.glide.Glide
-import com.bumptech.glide.load.resource.bitmap.Rotate
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
@@ -64,6 +60,7 @@ class data {
             // Initialize the player
             player = ExoPlayer.Builder(c).build()
         }
+        /*
         suspend fun downloadMedia(context: Context, mediaUrl: String, mediaName: String): Boolean {
             return withContext(Dispatchers.IO) {  // Perform the network and file I/O in the IO thread
                 try {
@@ -118,6 +115,72 @@ class data {
                 }
             }
         }
+         */
+
+        suspend fun downloadFileFromUrl(mediaUrl: String): ByteArray? {
+            return withContext(Dispatchers.IO) { // Perform the network I/O in the IO thread
+                try {
+                    Log.d("storage", "Downloading started for url: $mediaUrl")
+
+                    // Open connection to the URL
+                    val url = URL(mediaUrl)
+                    val connection = url.openConnection() as HttpURLConnection
+                    connection.connect()
+
+                    // Check response code to ensure successful connection
+                    if (connection.responseCode != HttpURLConnection.HTTP_OK) {
+                        Log.d("storage", "Failed to connect: ${connection.responseCode}")
+                        return@withContext null
+                    }
+
+                    // Create input stream from the URL
+                    val inputStream: InputStream = connection.inputStream
+
+                    // Read all data from the input stream
+                    val result = inputStream.readBytes()
+                    inputStream.close()
+
+                    Log.d("storage", "Downloading ended for url: $mediaUrl")
+                    return@withContext result
+                } catch (e: Exception) {
+                    Log.d("storage", "Error while downloading: ", e)
+                    return@withContext null
+                }
+            }
+        }
+        suspend fun saveFileToStorage(context: Context, mediaName: String, fileData: ByteArray): Boolean {
+            return withContext(Dispatchers.IO) { // Perform the file I/O in the IO thread
+                try {
+                    Log.d("storage", "Saving file started for name: $mediaName")
+
+                    // Check if the file already exists
+                    val file = getFileByName(context, mediaName)
+                    if (file != null) {
+                        Log.d("storage", "File already exists: ${file.absolutePath}")
+                        return@withContext true
+                    }
+
+                    // Get internal storage directory
+                    val internalStorage = context.filesDir
+                    val mediaFile = File(internalStorage, mediaName)
+
+                    // Write the data to the file
+                    mediaFile.outputStream().use { outputStream ->
+                        outputStream.write(fileData)
+                    }
+
+                    Log.d("storage", "Saving file ended, path: ${mediaFile.absolutePath}")
+                    return@withContext true
+                } catch (e: Exception) {
+                    Log.d("storage", "Error while saving file: ", e)
+                    return@withContext false
+                }
+            }
+        }
+
+
+
+
         fun showMedia(context: Context, mediaType: String, mediaFile: File?,in_group:Boolean) {
             if(in_group){
                 //add this ad to the ads_group
@@ -353,7 +416,6 @@ class data {
                     } else {
                         //there are some schedules:
                         //1) schedule them
-                        Toast.makeText(c, "Loading schedules...", Toast.LENGTH_SHORT).show()
                         for (s in schedules) {
                             if (s != null) {
                                 val ids = s.ad_id!!.split(";")
@@ -366,22 +428,26 @@ class data {
                                             //2) save media in the storage for offline consulting (if that ads media not already saved)
                                             //each media saved in the storage with the name equals to ad_id
                                             GlobalScope.launch {
-                                                var result = downloadMedia(c, url + "media/" + id, id)
-                                                while (!result) {
-                                                    Toast.makeText(
-                                                        c,
-                                                        "Error while downloading",
-                                                        Toast.LENGTH_SHORT
-                                                    ).show()
-                                                    result = downloadMedia(
-                                                        c,
-                                                        url + "media/" + s.ad_id,
-                                                        s.ad_id.toString()
-                                                    )
+                                                //1) check if that file already exist or not
+                                                val file = getFileByName(c,id)
+                                                if(file == null) {
+                                                    val result = downloadFileFromUrl(url + "media/" + id)
+                                                    if (result == null) {
+                                                        Log.d("storage", "download failed")
+                                                        //start again the download
+                                                        withContext(Dispatchers.Main) {
+                                                            show_offline_if_unable_to_load_schedules(c)
+                                                        }
+                                                    } else {
+                                                        Log.d("storage", "downloaded successfully")
+                                                        saveFileToStorage(c, id, result)
+                                                        //now when we got the ad : start scheduling it
+                                                        scheduleAd(c, id, type, s.start!!, s.end!!, inGroup)
+                                                    }
+                                                }else{
+                                                    //file already downloaded
+                                                    scheduleAd(c, id, type, s.start!!, s.end!!, inGroup)
                                                 }
-                                                //now when we got the ad : start scheduling it
-                                                scheduleAd(c, id, type, s.start!!, s.end!!,inGroup)
-                                                Log.d("storage", "downloaded successfully")
                                             }
                                         }else{
                                             //type is null
