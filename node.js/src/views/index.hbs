@@ -149,7 +149,7 @@
             <div class="row">
                 <div class="col-12">
                     <button class="btn btn-primary mb-4 mt-3" onclick="toggleForm('adForm')">Add New Ad</button>
-                    <!-- this is for creat -->
+                    <!-- this is for create -->
                     <div id="adForm" class="form-container mb-5">
                         <h4>Add Ad</h4>
                         <form onsubmit="return addAd(event)">
@@ -189,18 +189,6 @@
                                 <label for="adDescriptionInputEdit">Description</label>
                                 <textarea class="form-control" id="adDescriptionInputEdit" rows="3" placeholder="Enter ad description"></textarea>
                             </div>
-                            <div class="form-group">
-                                <label for="adTypeSelectEdit">Type</label>
-                                <select class="form-control" id="adTypeSelectEdit">
-                                    <option id="image_option_edit" value="image">Image</option>
-                                    <option id="music_option_edit" value="music">Music</option>
-                                    <option id="video_option_edit" value="video">Video</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="adMediaInput">Media</label>
-                                <input type="file" class="form-control-file" id="adMediaInputEdit" accept="image/*,audio/*,video/*">
-                            </div>
                             <button class="btn btn-success" id="update_ad_button">Edit Ad</button>
                         </form>
                     </div>
@@ -233,7 +221,6 @@
                     <div id="scheduleForm" class="form-container mb-5">
                         <h4>Add Schedule</h4>
                         <form onsubmit="return addSchedule(event)">
-
                             <div class="form-group" id="ads_of_schedule">
                                 <label for="scheduleAdSelect">Ad</label>
                                 <select class="form-control" id="scheduleAdSelect">
@@ -241,9 +228,6 @@
                                 <button type="button" class="btn btn-link addAdButton" id="the_ad_add_button_to_schedule" onclick="addAnotherAd()">+ Add Another Ad</button>
                             </div>
 
-
-
-    
                             <div class="form-group">
                                 <label for="scheduleDeviceSelect">Device</label>
                                 <select class="form-control" id="scheduleDeviceSelect">

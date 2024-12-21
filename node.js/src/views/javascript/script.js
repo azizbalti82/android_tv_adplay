@@ -717,31 +717,19 @@ async function editAd(id) {
     // Extract data from the form
     const title = document.getElementById('adTitleInputEdit').value;
     const description = document.getElementById('adDescriptionInputEdit').value;
-    const type = document.getElementById('adTypeSelectEdit').value;
-    const media = document.getElementById('adMediaInputEdit').files[0]; // Get the file selected by the user
-    const fileExtension = '.'+media.name.split('.').pop(); // Get the file extension (e.g., 'jpg')
 
 
     // Validation (optional)
-    if (!title || !description || !type || !media) {
+    if (!title || !description) {
         alert('Please fill in all fields');
         return;
     }
 
     // Create the ad object
-    const adData = !media ? {
+    const adData = {
         title: title,
         description: description,
-        type: type,
-    } : {
-        title: title,
-        description: description,
-        type: type,
-        mediaUrl:"loading",
-        mediaExtension:fileExtension 
-    };
-
-    console.error(adData);
+    }
 
     // Send to server (optional, adjust API endpoint accordingly)
     try {
@@ -863,21 +851,12 @@ async function editAdToggleForm(data) {
         const id = data.id;
         const title = data.title;
         const description = data.description;
-        const type = data.type;
-        const media = data.mediaUrl;
 
 
         // Set placeholders
         document.getElementById('adTitleInputEdit').value = title
         document.getElementById('adDescriptionInputEdit').value = description
 
-        if(type==='image'){
-            document.getElementById('image_option_edit').selected = true
-        }else if(type==='music'){
-            document.getElementById('music_option_edit').selected = true
-        }else if(type==='video'){
-            document.getElementById('video_option_edit').selected = true
-        }
 
         // Get the form element
         const form = document.getElementById('adFormEdit');
@@ -938,6 +917,10 @@ async function editScheduleToggleForm(data) {
                 editSchedule(id);
             });
             
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth' // Optional: Makes the scroll smooth
+            });
         }
     } catch (error) {
         console.error('Error updating', error);
