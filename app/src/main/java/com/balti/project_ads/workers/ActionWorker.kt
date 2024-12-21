@@ -13,6 +13,7 @@ class ActionWorker(val context: Context, workerParams: WorkerParameters) : Worke
         // Retrieve data passed to the Worker
         val adId = inputData.getString("id") ?: return Result.failure()
         val mediaType = inputData.getString("mediaType") ?: return Result.failure()
+        val inGroup = inputData.getBoolean("inGroup", defaultValue = false)
 
         Log.d("ActionWorker", "ad id executed: $adId with media type: $mediaType")
 
@@ -21,7 +22,7 @@ class ActionWorker(val context: Context, workerParams: WorkerParameters) : Worke
             try {
                 // Assuming showMedia updates the UI, so it should be done on the main thread
                 val file = data.getFileByName(context, adId)
-                data.showMedia(applicationContext, mediaType, file)
+                data.showMedia(applicationContext, mediaType, file,inGroup)
             } catch (e: Exception) {
                 Log.e("ActionWorker", "Error showing media", e)
             }

@@ -2,26 +2,39 @@ package com.balti.project_ads
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.Matrix
+import android.icu.text.Transliterator.Position
 import android.net.Uri
+import android.os.CountDownTimer
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
+import android.view.TextureView
 import android.view.View
 import android.widget.Toast
 import androidx.work.Data
 import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkManager
 import com.balti.project_ads.backend.ApiCalls
+import com.balti.project_ads.backend.models.AdGroupItem
 import com.balti.project_ads.databinding.ActivityMainBinding
 import com.balti.project_ads.workers.ActionWorker
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.Rotate
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.google.android.exoplayer2.util.Util
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.InputStream
@@ -41,13 +54,16 @@ class data {
         var connected = false
         //for exo player
         private lateinit var player: ExoPlayer
+        private var playbackJob: Job? = null
 
+        //schedule group is a group of ads will be shown in order in a loop
+        var ads_group:ArrayList<AdGroupItem> = ArrayList()
+
+        //deal with media
         fun initializeExoPlayer(c:Context) {
             // Initialize the player
             player = ExoPlayer.Builder(c).build()
         }
-
-        //deal with media
         suspend fun downloadMedia(context: Context, mediaUrl: String, mediaName: String): Boolean {
             return withContext(Dispatchers.IO) {  // Perform the network and file I/O in the IO thread
                 try {
@@ -102,76 +118,211 @@ class data {
                 }
             }
         }
-        fun showMedia(context: Context, mediaType: String, mediaFile: File?) {
-            // Stop and release the player if it already exists
-            if (::player.isInitialized) {
-                player.stop()
-                player.release()
+        fun showMedia(context: Context, mediaType: String, mediaFile: File?,in_group:Boolean) {
+            if(in_group){
+                //add this ad to the ads_group
+                ads_group.add(AdGroupItem(mediaType,mediaFile))
+                Log.d("media_player", "ads group: "+ ads_group)
+
+                playAdsSequentially(context, ads_group)
             }
+            else{
+                // Stop and release the player if it already exists
+                if (::player.isInitialized) {
+                    player.stop()
+                    player.release()
+                }
+                // Reinitialize the Player
+                player = ExoPlayer.Builder(context).build()
+                // show the home
+                showHome()
+                // Hide all media views initially
+                bindHome.mediaAudio.cancelAnimation()
+                bindHome.mediaImage.visibility = View.GONE
+                bindHome.mediaAudio.visibility = View.GONE
+                bindHome.mediaVideo.visibility = View.GONE
+                bindHome.noMedia.visibility = View.GONE
 
-            // Reinitialize the Player
-            player = ExoPlayer.Builder(context).build()
+                if (mediaFile != null) {
+                    when (mediaType.lowercase()) {
+                        "image" -> {
+                            bindHome.mediaImage.visibility = View.VISIBLE
+                            // Load the image into Glide from external storage
+                            Glide.with(context)
+                                .load(Uri.fromFile(mediaFile))
+                                .into(bindHome.mediaImage)
+                        }
+                        "video" -> {
+                            bindHome.mediaVideo.visibility = View.VISIBLE
+                            // Initialize ExoPlayer to play video from external storage
+                            // Initialize ExoPlayer
+                            val player: ExoPlayer = ExoPlayer.Builder(context).build()
+                            // Apply 90-degree rotation using a Matrix
+                            val textureView = bindHome.mediaVideo.videoSurfaceView as? TextureView
+                            textureView?.post {
+                                val matrix = Matrix()
+                                val viewWidth = textureView.width.toFloat()
+                                val viewHeight = textureView.height.toFloat()
 
-            // show the home
-            showHome()
-            // Hide all media views initially
-            bindHome.mediaAudio.cancelAnimation()
-            bindHome.mediaImage.visibility = View.GONE
-            bindHome.mediaAudio.visibility = View.GONE
-            bindHome.mediaVideo.visibility = View.GONE
-            bindHome.noMedia.visibility = View.GONE
+                                // Rotate around the center
+                                matrix.postRotate(90f, viewWidth / 2, viewHeight / 2)
 
-            if (mediaFile != null) {
-                when (mediaType.lowercase()) {
-                    "image" -> {
-                        bindHome.mediaImage.visibility = View.VISIBLE
-                        // Load the image into Glide from external storage
-                        Glide.with(context)
-                            .load(Uri.fromFile(mediaFile))
-                            .into(bindHome.mediaImage)
-                    }
-                    "video" -> {
-                        bindHome.mediaVideo.visibility = View.VISIBLE
-                        // Initialize ExoPlayer to play video from external storage
-                        val player: ExoPlayer = ExoPlayer.Builder(context).build()
-                        bindHome.mediaVideo.player = player
-                        bindHome.mediaVideo.useController = false
+                                // Scale to fill the PlayerView
+                                matrix.postScale(viewHeight / viewWidth, viewWidth / viewHeight, viewWidth / 2, viewHeight / 2)
 
-                        val mediaItem = MediaItem.fromUri(Uri.fromFile(mediaFile))
-                        val dataSourceFactory = DefaultDataSourceFactory(context, Util.getUserAgent(context, "exo"))
-                        val mediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
-                            .createMediaSource(mediaItem)
+                                textureView.setTransform(matrix)
+                            }
+                            bindHome.mediaVideo.player = player
+                            bindHome.mediaVideo.useController = false
 
-                        player.repeatMode = Player.REPEAT_MODE_ONE
-                        player.setMediaSource(mediaSource)
-                        player.prepare()
-                        player.play()
-                    }
-                    "music" -> {
-                        // Show the audio view
-                        bindHome.mediaAudio.visibility = View.VISIBLE
-                        bindHome.mediaAudio.playAnimation()
+                            val mediaItem = MediaItem.fromUri(Uri.fromFile(mediaFile))
+                            val dataSourceFactory = DefaultDataSourceFactory(context, Util.getUserAgent(context, "exo"))
+                            val mediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
+                                .createMediaSource(mediaItem)
 
-                        // Play audio using ExoPlayer
-                        val mediaItem = MediaItem.fromUri(Uri.fromFile(mediaFile))
-                        val dataSourceFactory = DefaultDataSourceFactory(context, Util.getUserAgent(context, "exo"))
-                        val mediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
-                            .createMediaSource(mediaItem)
+                            // Apply rotation
+                            player.repeatMode = Player.REPEAT_MODE_ONE
+                            player.setMediaSource(mediaSource)
+                            player.prepare()
+                            player.play()
+                        }
+                        "music" -> {
+                            // Show the audio view
+                            bindHome.mediaAudio.visibility = View.VISIBLE
+                            bindHome.mediaAudio.playAnimation()
 
-                        player.setMediaSource(mediaSource)
-                        player.prepare()
-                        player.repeatMode = Player.REPEAT_MODE_ONE
-                        player.play()
-                    }
-                    else -> {
-                        // Handle unsupported media type
-                        bindHome.noMedia.visibility = View.VISIBLE
+                            // Play audio using ExoPlayer
+                            val mediaItem = MediaItem.fromUri(Uri.fromFile(mediaFile))
+                            val dataSourceFactory = DefaultDataSourceFactory(context, Util.getUserAgent(context, "exo"))
+                            val mediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
+                                .createMediaSource(mediaItem)
+
+                            player.setMediaSource(mediaSource)
+                            player.prepare()
+                            player.repeatMode = Player.REPEAT_MODE_ONE
+                            player.play()
+                        }
+                        else -> {
+                            // Handle unsupported media type
+                            bindHome.noMedia.visibility = View.VISIBLE
+                        }
                     }
                 }
-            }else{
-                // Handle unsupported media type
-                bindHome.noMedia.visibility = View.VISIBLE
+                else{
+                    // Handle unsupported media type
+                    bindHome.noMedia.visibility = View.VISIBLE
+                }
             }
+        }
+        fun playAdsSequentially(context:Context,adsGroup: List<AdGroupItem>) {
+            try{
+                    // Cancel any ongoing playback
+                    playbackJob?.cancel()
+                    // Launch a new coroutine for playback
+                    playbackJob =  CoroutineScope(Dispatchers.Main).launch {
+                        for (ad in adsGroup) {
+                            // Stop and release the player if it already exists
+                            if (::player.isInitialized) {
+                                player.stop()
+                                player.release()
+                            }
+                            // Reinitialize the Player
+                            player = ExoPlayer.Builder(context).build()
+                            // show the home
+                            showHome()
+                            // Hide all media views initially
+                            bindHome.mediaAudio.cancelAnimation()
+                            bindHome.mediaImage.visibility = View.GONE
+                            bindHome.mediaAudio.visibility = View.GONE
+                            bindHome.mediaVideo.visibility = View.GONE
+                            bindHome.noMedia.visibility = View.GONE
+
+                            when (ad.type.lowercase()) {
+                                "image" -> {
+                                    Log.d("media_player", "image will play")
+                                    bindHome.mediaImage.visibility = View.VISIBLE
+                                    Glide.with(context)
+                                        .load(Uri.fromFile(ad.mediaFile))
+                                        .into(bindHome.mediaImage)
+
+                                    // Wait for 10 seconds before hiding the image
+                                    delay(10000)
+                                    bindHome.mediaImage.visibility = View.GONE
+                                }
+                                "video" -> {
+                                    Log.d("media_player", "video will play")
+                                    bindHome.mediaVideo.visibility = View.VISIBLE
+                                    player = ExoPlayer.Builder(context).build()
+                                    bindHome.mediaVideo.player = player
+                                    bindHome.mediaVideo.useController = false
+
+                                    val mediaItem = MediaItem.fromUri(Uri.fromFile(ad.mediaFile))
+                                    val dataSourceFactory = DefaultDataSourceFactory(context, Util.getUserAgent(context, "exo"))
+                                    val mediaSource = ProgressiveMediaSource.Factory(dataSourceFactory).createMediaSource(mediaItem)
+
+                                    player.setMediaSource(mediaSource)
+                                    player.prepare()
+                                    player.play()
+
+                                    // Suspend until video playback completes
+                                    suspendCancellableCoroutine { continuation ->
+                                        player.addListener(object : Player.Listener {
+                                            override fun onPlaybackStateChanged(state: Int) {
+                                                if (state == Player.STATE_ENDED) {
+                                                    continuation.resume(Unit) {}
+                                                }
+                                            }
+                                        })
+                                    }
+
+                                    bindHome.mediaVideo.visibility = View.GONE
+                                    player.release()
+                                }
+                                "music" -> {
+                                    Log.d("media_player", "audio will play")
+                                    bindHome.mediaAudio.visibility = View.VISIBLE
+                                    bindHome.mediaAudio.playAnimation()
+
+                                    player = ExoPlayer.Builder(context).build()
+                                    val mediaItem = MediaItem.fromUri(Uri.fromFile(ad.mediaFile))
+                                    val dataSourceFactory = DefaultDataSourceFactory(context, Util.getUserAgent(context, "exo"))
+                                    val mediaSource = ProgressiveMediaSource.Factory(dataSourceFactory).createMediaSource(mediaItem)
+
+                                    player.setMediaSource(mediaSource)
+                                    player.prepare()
+                                    player.play()
+
+                                    // Suspend until music playback completes
+                                    suspendCancellableCoroutine { continuation ->
+                                        player.addListener(object : Player.Listener {
+                                            override fun onPlaybackStateChanged(state: Int) {
+                                                if (state == Player.STATE_ENDED) {
+                                                    continuation.resume(Unit) {}
+                                                }
+                                            }
+                                        })
+                                    }
+
+                                    bindHome.mediaAudio.visibility = View.GONE
+                                    bindHome.mediaAudio.cancelAnimation()
+                                    player.release()
+                                }
+                                else -> {
+                                    Log.d("media_player", "unsupported media type")
+                                    bindHome.noMedia.visibility = View.VISIBLE
+                                    delay(2000) // Wait for 2 seconds for unsupported media
+                                    bindHome.noMedia.visibility = View.GONE
+                                }
+                            }
+                        }
+
+                        Log.d("media_player", "done playing all ads")
+                        if(ads_group.isNotEmpty()){
+                            playAdsSequentially(context,adsGroup)
+                        }
+                    }
+                }
+            catch (e:Exception){ Log.e("media_player", "playAdsSequentially: "+e.message.toString()) }
         }
         fun getFileByName(context: Context, fileName: String): File? {
             // Get the internal storage directory
@@ -187,38 +338,54 @@ class data {
         }
 
         //use this to schedule an ad (save it to worker)
-        fun get_schdules(c:Context,deviceId: String) {
+        @OptIn(DelicateCoroutinesApi::class)
+        fun get_schdules(c:Context, deviceId: String) {
             //first thing : show there is no ads for this moment
-            showMedia(c, "",null)
+            ads_group.clear() //clear the ads group
+            showMedia(c, "",null,false)
             //now schedule ads (if they exist)
             apiCalls.getSchedulesByDeviceId(deviceId) { schedules ->
                 if (schedules != null) {
                     // we got schedules
-                    if(schedules.isEmpty()){
+                    if (schedules.isEmpty()) {
                         //see if there are new ads
-                        showMedia(c, "",null)
-                    }else{
+                        showMedia(c, "", null,false)
+                    } else {
                         //there are some schedules:
                         //1) schedule them
-                        for(s in schedules){
-                            if(s!=null){
-                                //1) get the media type from the ad
-                                apiCalls.getMediaTypeFromAd(s.ad_id!!) { type ->
-                                    if (type != null) {
-                                        //2) save media in the storage for offline consulting (if that ads media not already saved)
-                                        //each media saved in the storage with the name equals to ad_id
-                                        GlobalScope.launch {
-                                            val result = downloadMedia(c,data.url + "media/" + s.ad_id,s.ad_id.toString())
-                                            if(result){
+                        Toast.makeText(c, "Loading schedules...", Toast.LENGTH_SHORT).show()
+                        for (s in schedules) {
+                            if (s != null) {
+                                val ids = s.ad_id!!.split(";")
+                                val inGroup = s.ad_id!!.contains(";")
+                                for (id in ids) {
+                                    Log.d("storage", "id: $id")
+                                    //1) get the media type from the ad
+                                    apiCalls.getMediaTypeFromAd(id) { type ->
+                                        if(type!=null) {
+                                            //2) save media in the storage for offline consulting (if that ads media not already saved)
+                                            //each media saved in the storage with the name equals to ad_id
+                                            GlobalScope.launch {
+                                                var result = downloadMedia(c, url + "media/" + id, id)
+                                                while (!result) {
+                                                    Toast.makeText(
+                                                        c,
+                                                        "Error while downloading",
+                                                        Toast.LENGTH_SHORT
+                                                    ).show()
+                                                    result = downloadMedia(
+                                                        c,
+                                                        url + "media/" + s.ad_id,
+                                                        s.ad_id.toString()
+                                                    )
+                                                }
                                                 //now when we got the ad : start scheduling it
-                                                scheduleAd(c,s.ad_id!!,type,s.start!!,s.end!!)
+                                                scheduleAd(c, id, type, s.start!!, s.end!!,inGroup)
                                                 Log.d("storage", "downloaded successfully")
-                                            }else{
-                                                Log.d("storage", "download Error")
                                             }
+                                        }else{
+                                            //type is null
                                         }
-                                    } else {
-                                        // unable to extract that media type
                                     }
                                 }
                             }
@@ -230,7 +397,7 @@ class data {
                 }
             }
         }
-        fun scheduleAd(c:Context,adId: String, mediaType:String, startTime: Date, endTime: Date) {
+        fun scheduleAd(c:Context,adId: String, mediaType:String, startTime: Date, endTime: Date, inGroup:Boolean) {
             // Calculate delay in milliseconds
             val currentTime = System.currentTimeMillis()
             Log.d("ActionWorker", "ad type: ${mediaType}")
@@ -240,24 +407,26 @@ class data {
             val delay_to_start: Long = (startTime.time/*+one_houre*/) - currentTime
             val delay_to_end: Long = (endTime.time/*+one_houre*/) - currentTime
 
+            Log.d("ActionWorker", "current time : $currentTime")
             val still_valid = delay_to_end > 0
 
             // Check if the delay is positive (i.e., scheduled time is in the future)
             if (still_valid) {
                 //save when the ad will start
-                add_to_worked(c,adId,mediaType,delay_to_start)
+                add_to_worked(c,adId,mediaType,delay_to_start,inGroup)
                 //save when the ad will end
-                add_to_worked(c,adId,"",delay_to_end)
+                add_to_worked(c,adId,"",delay_to_end,inGroup)
             } else {
                 // If the scheduled time has already passed, do nothing
                 Log.d("ActionWorker", "Scheduled time has already passed. Action not scheduled.")
             }
         }
-        fun add_to_worked(c:Context,adId: String,mediaType_:String,delay:Long){
+        fun add_to_worked(c:Context,adId: String,mediaType_:String,delay:Long,inGroup:Boolean){
             // Prepare input data for the Worker
             val inputData: Data = Data.Builder()
                 .putString("id", adId)
                 .putString("mediaType", mediaType_)
+                .putBoolean("inGroup", inGroup)
                 .build()
 
             // Create a OneTimeWorkRequest with a delay
@@ -285,9 +454,19 @@ class data {
             bindHome.containerHome.visibility = View.GONE
             bindHome.containerConnect.visibility = View.GONE
 
-            bindHome.tryAgain.setOnClickListener {
-                get_schdules(c, deviceId)
+            bindHome.offlineContainer.visibility = View.VISIBLE
+            bindHome.timer.text = "10"
+            // Create a 10-second timer
+            val timer = object : CountDownTimer(10000, 1000) { // 10 seconds, ticks every 1 second
+                override fun onTick(millisUntilFinished: Long) {
+                    bindHome.timer.text = (millisUntilFinished/1000).toString()
+                }
+
+                override fun onFinish() {
+                    get_schdules(c, deviceId)
+                }
             }
+            timer.start()
         }
     }
 }

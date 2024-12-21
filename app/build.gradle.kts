@@ -51,6 +51,7 @@ dependencies {
     //to read media
     implementation(libs.exoplayer.core)
     implementation(libs.exoplayer.ui)
+    implementation (libs.androidx.media3.effect)
     implementation (libs.extension.cronet)
     implementation(libs.glide) //for image
     implementation(libs.lottie)
@@ -64,13 +65,6 @@ dependencies {
 
     //for permissions management
     implementation(libs.dexter)
-
-
-    implementation(libs.android.job)
-
-
-
-
 
 
 

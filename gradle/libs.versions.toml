@@ -11,6 +11,7 @@ kotlinxCoroutinesAndroid = "1.7.3"
 leanback = "1.0.0"
 glide = "4.11.0"
 lottie = "6.2.0"
+media3Effect = "1.5.1"
 retrofit = "2.11.0"
 workRuntimeKtx = "2.10.0"
 
@@ -19,6 +20,7 @@ android-job = { module = "com.evernote:android-job", version.ref = "androidJob" 
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-leanback = { group = "androidx.leanback", name = "leanback", version.ref = "leanback" }
+androidx-media3-effect = { module = "androidx.media3:media3-effect", version.ref = "media3Effect" }
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtx" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "retrofit" }
 dexter = { module = "com.karumi:dexter", version.ref = "dexter" }

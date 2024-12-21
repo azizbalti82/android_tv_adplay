@@ -1,4 +1,5 @@
 package com.balti.project_ads.backend.models
+import java.io.File
 import java.util.Date
 
 
@@ -62,5 +63,14 @@ data class ad_content(
     val createdAt: String? = null,  // Corresponds to "ad.createdAt"
     val updatedAt: String? = null,  // Corresponds to "ad.updatedAt"
     val v: Int? = null  // Corresponds to "ad.__v"
+)
+
+
+
+
+
+data class AdGroupItem(
+    var type: String,
+    var mediaFile: File?,
 )
 

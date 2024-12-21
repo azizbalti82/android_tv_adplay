@@ -72,18 +72,22 @@ class ApiCalls {
     }
 
     // crud for connected devices
-    fun isDeviceConnected(deviceId: String, callback: (Boolean) -> Unit) {
+    fun isDeviceConnected(deviceId: String, callback: (String) -> Unit) {
         val call = Api.getDevice(deviceId) // Get device to check if connected
         call.enqueue(object : Callback<Device> {
             override fun onResponse(call: Call<Device>, response: Response<Device>) {
                 // If the device exists, it's considered connected
                 Log.e(TAG, "device connected")
-                callback(response.isSuccessful)
+                if(response.body()?.Device!=null && response.body()?.Device?.id == deviceId){
+                    callback("connect")
+                }else{
+                    callback("not_connect")
+                }
             }
 
             override fun onFailure(call: Call<Device>, t: Throwable) {
                 Log.e(TAG, "error checking device connectivity")
-                callback(false)
+                callback("error")
             }
         })
     }
@@ -113,7 +117,6 @@ class ApiCalls {
             }
         })
     }
-
     fun updateDevice(deviceId: String, device: Status, callback: (Boolean) -> Unit) {
         val call = Api.updateDeviceStatus(deviceId, device)
         call.enqueue(object : Callback<Boolean> {
@@ -132,7 +135,6 @@ class ApiCalls {
             }
         })
     }
-
     // crud for schedules
     fun getSchedulesByDeviceId(deviceId: String, callback: (List<Schedule?>?) -> Any) {
         Api.getSchedulesByDeviceId(deviceId)?.enqueue(object : Callback<List<Schedule?>?> {

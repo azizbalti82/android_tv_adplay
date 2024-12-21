@@ -2,6 +2,7 @@ package com.balti.project_ads
 
 import android.content.Context
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.util.Log
 import android.view.View
 import android.widget.Toast
@@ -79,6 +80,12 @@ class MainActivity : FragmentActivity() {
         root.rotation = 90f
         // Ensure the layout is centered
         root.requestLayout()
+
+
+        //bindHome.mediaVideo.rotation = 90f
+        //bindHome.mediaVideo.scaleX = -1f // Horizontal flip
+
+
         //-----------------------------------------------------
 
 
@@ -96,12 +103,11 @@ class MainActivity : FragmentActivity() {
     private fun setupApp(){
         //start loading animation
         setSection("loading")
-        data.apiCalls.isDeviceConnected(data.deviceId) { connected ->
-            data.connected = connected
-            if (connected) {
+        data.apiCalls.isDeviceConnected(data.deviceId) {msg ->
+            data.connected = msg=="connect"
+            if(msg=="connect"){
                 setupHome()
-            }
-            else {
+            }else if(msg=="not_connect"){
                 //device not added to server
                 //check if there is a temp device in android
                 if(data.deviceId!=""){
@@ -112,6 +118,8 @@ class MainActivity : FragmentActivity() {
                     //if its not valid (expired or deleted): generate a new temp device
                     create_device()
                 }
+            }else if(msg=="error"){
+                setSection("offline")
             }
         }
     }
@@ -197,17 +205,18 @@ class MainActivity : FragmentActivity() {
         when (sectionName) {
             "offline" -> {
                 bindHome.offlineContainer.visibility = View.VISIBLE
-                bindHome.tryAgain.setOnClickListener {
-                    setSection("loading")
-                    data.apiCalls.isDeviceConnected(data.deviceId) { connected ->
-                        data.connected = connected
-                        if (connected) {
-                            setupHome()
-                        } else {
-                            create_device()
-                        }
+                bindHome.timer.text = "10"
+                // Create a 10-second timer
+                val timer = object : CountDownTimer(10000, 1000) { // 10 seconds, ticks every 1 second
+                    override fun onTick(millisUntilFinished: Long) {
+                        bindHome.timer.text = (millisUntilFinished/1000).toString()
+                    }
+
+                    override fun onFinish() {
+                        setupApp()
                     }
                 }
+                timer.start()
             }
             "connect" -> {
                 bindHome.containerConnect.visibility = View.VISIBLE
