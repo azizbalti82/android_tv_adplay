@@ -333,7 +333,7 @@ async function fetchSchedules() {
 
                     let ads_string = "";
                     for (let ad of ads) {
-                        ads_string += (ads_string ? ", " : "") + ad;
+                        ads_string += (ads_string ? ", " : "") + ad.title;
                     }
 
                     
