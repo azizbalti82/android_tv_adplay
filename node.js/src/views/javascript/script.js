@@ -331,10 +331,11 @@ async function fetchSchedules() {
                     
                     // Populate the table row
 
-                    const ads_string = ""
-                    for (ad in ads) {
-                        ads_string += (ads_string.isNotEmpty())? ", $ad" : ad
+                    let ads_string = "";
+                    for (let ad of ads) {
+                        ads_string += (ads_string ? ", " : "") + ad;
                     }
+
                     
                     const ad_id = document.createElement('td');
                     ad_id.textContent = ads_string;
