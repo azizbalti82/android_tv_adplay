@@ -34,7 +34,7 @@ app.use('/images', express.static(path.join(__dirname, 'views', 'images')));
 
 // MongoDB connection
 //const MONGO_URI = "mongodb://mongo:hSjBsOKjnZYHdUUVEXUDUCEMZSCApjDd@junction.proxy.rlwy.net:28709";
-const MONGO_URI = "mongodb+srv://azizbalti28:azizbalti123aziz@projectad.vdyro.mongodb.net/ads?retryWrites=true&w=majority&appName=projectAd";
+const MONGO_URI = "mongodb+srv://azizbalti28:azizbalti123aziz@projectad.vdyro.mongodb.net/?retryWrites=true&w=majority&appName=projectAd";
 
 mongoose.connect(MONGO_URI, {})
 .then(() => console.log('Connected to MongoDB'))
