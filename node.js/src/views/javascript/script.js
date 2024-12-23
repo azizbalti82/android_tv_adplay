@@ -321,16 +321,21 @@ async function fetchSchedules() {
                         ads_ids.push(ad)
                     }
 
-                    // Extract device_name from the lookup maps
+                    // Extract ad_title and device_name from the lookup maps
+                    const ad = adsMap[ads_ids[0]];
                     const device = devicesMap[schedule.device_id];
-                    let ads_string = "";
-                    for (let ad of ads) {
-                        ads_string += (ads_string ? ", " : "") + ad.title;
-                    }
-                    
+
                     console.log('ad for this schedule are: '+ad.id)
                     
                     // Populate the table row
+
+                    let ads_string = "";
+                    for (let ad_id of ads_ids) {
+                        const ad = adsMap[ad_id];
+                        ads_string += (ads_string ? ", " : "") + ad.title;
+                    }
+
+                    
                     const ad_id = document.createElement('td');
                     ad_id.textContent = ads_string;
                     row.appendChild(ad_id);
