@@ -332,7 +332,7 @@ async function fetchSchedules() {
                     // Populate the table row
 
                     const ads_string = ""
-                    for (ad in adsList) {
+                    for (ad in ads) {
                         ads_string += (ads_string.isNotEmpty())? ", $ad" : ad
                     }
                     
