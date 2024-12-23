@@ -316,12 +316,10 @@ async function fetchSchedules() {
                     // Split the concatenated string into individual ad IDs
                     const adIds = schedule.ad_id.split(';');
                     
-                    const ads = []
+                    const ads_ids = []
                     for (const ad of adIds) {
-                        ads.push(ad)
+                        ads_ids.push(ad)
                     }
-
-
 
                     // Extract ad_title and device_name from the lookup maps
                     const ad = adsMap[ads[0]];
