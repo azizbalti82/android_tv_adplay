@@ -51,7 +51,6 @@
             android:visibility="gone"
             />
 
-
         <!-- image view -->
         <ImageView
             android:id="@+id/media_image"
@@ -69,13 +68,11 @@
             android:orientation="vertical"
             android:visibility="gone"
             >
-
             <ImageView
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:src="@drawable/advertising"
                 app:tint="@color/textSecondary" />
-
             <TextView
                 android:layout_marginTop="25dp"
                 android:layout_width="wrap_content"

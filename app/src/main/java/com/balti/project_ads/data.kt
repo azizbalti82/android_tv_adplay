@@ -180,7 +180,6 @@ class data {
 
 
 
-
         fun showMedia(context: Context, mediaType: String, mediaFile: File?,in_group:Boolean) {
             if(in_group){
                 //add this ad to the ads_group

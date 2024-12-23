@@ -86,7 +86,7 @@ class ApiCalls {
             }
 
             override fun onFailure(call: Call<Device>, t: Throwable) {
-                Log.e(TAG, "error checking device connectivity")
+                Log.e(TAG, "error checking device connectivity:"+t.toString())
                 callback("error")
             }
         })

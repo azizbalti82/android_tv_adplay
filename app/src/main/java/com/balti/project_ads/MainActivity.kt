@@ -92,16 +92,19 @@ class MainActivity : FragmentActivity() {
         data.apiCalls = ApiCalls()
         data.deviceId = shared.get_id(this)
 
-
-        //start the app
-        setupApp()
-
+        if(data.deviceId==""){
+            get_device_temp()
+        }else{
+            //start the app
+            setupApp()
+        }
     }
 
 
     private fun setupApp(){
         //start loading animation
         setSection("loading")
+
         data.apiCalls.isDeviceConnected(data.deviceId) {msg ->
             data.connected = msg=="connect"
             if(msg=="connect"){
@@ -169,7 +172,6 @@ class MainActivity : FragmentActivity() {
     }
     fun set_connectivity(connected: Boolean) {
         data.apiCalls.getDevice(data.deviceId) { device ->
-            //Toast.makeText(this, device.toString(), Toast.LENGTH_SHORT).show()
             if (device != null) {
                 device.Device.name.let { Log.d("error_", it) }
                 if(connected){
