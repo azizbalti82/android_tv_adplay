@@ -68,8 +68,9 @@ const delete_ad = async (req, res) => {
 
         res.status(200).json({ message: 'Ad deleted successfully' });
 
-        // When a device is deleted, also delete all schedules related to it
-        const deletedSchedules = await Schedule.deleteMany({ ad_id: adId });
+        //const deletedSchedules = await Schedule.deleteMany({ ad_id: adId });
+        // Delete schedules related to those devices (all schedules contains this id)
+        const deletedSchedules = await Schedule.deleteMany({ ad_id: { $regex: adId, $options: "i" } });
         console.log(`${deletedSchedules.deletedCount} schedules deleted for ad ID: ${adId}`);
     } catch (err) {
         console.error(err);

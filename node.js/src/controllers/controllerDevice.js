@@ -53,7 +53,7 @@ const get = async (req, res) => {
         const result = await Device.findOne({ id: deviceId }, req.body, { new: true });
 
         if (!result) {
-            return res.status(404).json({ message: 'device not found' });
+            return res.status(500).json({ message: 'device not found' });
         }
         
         res.status(200).json({Device: result });
