@@ -330,15 +330,15 @@ async function fetchSchedules() {
                     console.log('ad for this schedule are: '+ad.id)
                     
                     // Populate the table row
-                    const ad_id = document.createElement('td');
-                    if(ads.length >1){
-                        ad_id.textContent = ad.title+' and '+(ads.length - 1)+' more';
-                    }else{
-                        ad_id.textContent = ad.title;
+
+                    const ads_string = ""
+                    for (ad in adsList) {
+                        ads_string += (ads_string.isNotEmpty())? ", $ad" : ad
                     }
                     
+                    const ad_id = document.createElement('td');
+                    ad_id.textContent = ads_string;
                     row.appendChild(ad_id);
-                
 
                     const device_id = document.createElement('td');
                     device_id.textContent = device.name;
