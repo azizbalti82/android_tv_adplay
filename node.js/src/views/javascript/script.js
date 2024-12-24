@@ -1,6 +1,6 @@
 //domain of the server
 var url = "https://adplayforandroidtv-production-13eb.up.railway.app"
-
+var ad_id_being_uploaded = ""
 
 
 
@@ -131,6 +131,10 @@ async function fetchAds(section) {
                 upload.style.color = "grey";
 
                 // Check if the media uploaded to the server or not
+                if(device.id === ad_id_being_uploaded){
+                    uploaded_status = "uploading now...";
+                    upload.style.color = "purple";
+                }
                 fetch(url + "/media/exist/" + device.id)
                 .then(response => {
                     if (response.status === 200) {
@@ -594,6 +598,7 @@ async function addAd(event) {
         });
 
         if (response.ok) {
+            ad_id_being_uploaded = data.ad.id;
             alert('ad added successfully!');
             const data = await response.json();
             uploadAdMedia(data.ad.id,media)
@@ -690,6 +695,9 @@ async function uploadAdMedia(id, media) {
     } catch (error) {
         console.error('Error uploading media:', error);
         alert('An error occurred during upload.');
+    } finally{
+        ad_id_being_uploaded = "";
+        showSection('ads')
     }
 }
 
