@@ -26,21 +26,12 @@
         android:layout_height="match_parent"
         android:gravity="center"
         android:orientation="vertical"
+        android:visibility="gone"
         >
 
-        <ProgressBar
-            android:id="@+id/loading_indicator"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="25dp"
-            android:indeterminate="true"
-            android:indeterminateTint="@color/textPrimary"
-            android:layout_gravity="center"
-            android:visibility="gone"
-            />
-
+        <!-- loading ads text indicator -->
         <TextView
-            android:id="@+id/loading_text"
+            android:id="@+id/loading_ads_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
@@ -58,6 +49,34 @@
             android:layout_height="match_parent"
             android:visibility="gone"
             />
+
+        <!-- invalid media view -->
+        <LinearLayout
+            android:id="@+id/media_invalid"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:visibility="gone"
+            >
+            <ImageView
+                android:layout_width="200dp"
+                android:layout_height="200dp"
+                android:src="@drawable/image_placeholder"
+                android:tint="@color/textSecondary"
+                android:layout_gravity="center"
+                />
+            <TextView
+                android:layout_marginTop="20dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="Invalid Media File"
+                android:textSize="18sp"
+                android:textColor="@color/textSecondary"
+                />
+        </LinearLayout>
+
 
         <!-- no media view -->
         <LinearLayout
@@ -151,7 +170,7 @@
 
     <!-- Offline Screen -->
     <LinearLayout
-        android:id="@+id/offline_container"
+        android:id="@+id/container_offline"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
@@ -164,7 +183,7 @@
             android:layout_height="50dp"
             android:layout_margin="30dp"
             android:src="@drawable/offline"
-            app:tint="@color/textSecondary" />
+            android:tint="@color/textSecondary" />
 
         <TextView
             android:layout_width="wrap_content"
