@@ -132,8 +132,9 @@ async function fetchAds(section) {
 
                 // Check if the media uploaded to the server or not
                 if(device.id === ad_id_being_uploaded){
-                    uploaded_status = "uploading now...";
+                    uploaded_status = "Uploading, please wait...";
                     upload.style.color = "purple";
+                    upload.textContent = uploaded_status;
                 }else{
                     fetch(url + "/media/exist/" + device.id)
                 .then(response => {
