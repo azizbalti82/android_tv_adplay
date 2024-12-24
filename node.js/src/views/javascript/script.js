@@ -134,8 +134,8 @@ async function fetchAds(section) {
                 if(device.id === ad_id_being_uploaded){
                     uploaded_status = "uploading now...";
                     upload.style.color = "purple";
-                }
-                fetch(url + "/media/exist/" + device.id)
+                }else{
+                    fetch(url + "/media/exist/" + device.id)
                 .then(response => {
                     if (response.status === 200) {
                         uploaded_status = "Uploaded";
@@ -154,6 +154,8 @@ async function fetchAds(section) {
                     upload.textContent = uploaded_status; // Update in case of error
                     upload.style.color = "red";
                 });
+                }
+                
 
                 row.appendChild(upload);
 
