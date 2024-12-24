@@ -685,7 +685,7 @@ async function uploadAdMedia(id, media) {
             alert(`Media uploaded successfully!`);
         } else {
             const error = await response.json();
-            alert(`Failed to upload media: ${error.message}`);
+            alert(`Failed to upload media: ${error}`);
         }
     } catch (error) {
         console.error('Error uploading media:', error);
