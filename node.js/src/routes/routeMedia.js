@@ -19,6 +19,6 @@ router.get('/media/:adId', get_media);
 router.delete('/media/:adId', delete_media);
 
 // check if media exist
-router.get('/media/exist/:adId', get_media);
+router.get('/media/exist/:adId', verify_media_exists);
 
 module.exports = router;

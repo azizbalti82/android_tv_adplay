@@ -675,14 +675,14 @@ async function uploadAdMedia(id, media) {
 
     try {
         // Send POST request to upload the file
-        const response = await fetch(url+'/media/'+id, { // Adjusted URL to match the new route
+        const response = await fetch(url+'/media/'+id, {
             method: 'POST',
             body: formData, // Send FormData directly
         });
 
         if (response.ok) {
             const result = await response.json();
-            alert(`Media uploaded successfully! Media ID: ${result.mediaId}`);
+            alert(`Media uploaded successfully!`);
         } else {
             const error = await response.json();
             alert(`Failed to upload media: ${error.message}`);
