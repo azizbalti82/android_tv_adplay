@@ -126,27 +126,27 @@ async function fetchAds(section) {
                 row.appendChild(type);
 
                 const upload = document.createElement('td');
+let uploaded_status = "";
 
-                const uploaded_status = ""
-                //check if the media uploaded to server or not
-                fetch(url+"/media/"+device.id)
-                .then(response => {
-                    if (response.status === 200) {
-                        uploaded_status = "Uploaded"
-                    } else if (response.status === 404) {
-                        uploaded_status = "Not Uploaded"
-                    } else {
-                        uploaded_status = "Not Uploaded"
-                    }
-                })
-                .catch(error => {
-                    uploaded_status = "faild"
-                });
+// Check if the media uploaded to the server or not
+fetch(url + "/media/" + device.id)
+  .then(response => {
+    if (response.status === 200) {
+      uploaded_status = "Uploaded";
+    } else if (response.status === 404) {
+      uploaded_status = "Not Uploaded";
+    } else {
+      uploaded_status = "Not Uploaded";
+    }
+    upload.textContent = uploaded_status; // Update the text content after fetch
+  })
+  .catch(error => {
+    uploaded_status = "Failed";
+    upload.textContent = uploaded_status; // Update in case of error
+  });
 
+row.appendChild(upload);
 
-
-                upload.textContent(uploaded_status);
-                row.appendChild(upload);
 
 
                 const tools = document.createElement('td');
