@@ -62,11 +62,16 @@ const delete_ad = async (req, res) => {
     try {
         const { adId } = req.params;
         const deletedAd = await Ad.findOneAndDelete({ id: adId });
-        const deletedMedia = await Media.findOneAndDelete({ id: adId });
         if (!deletedAd || !deletedMedia) {
             return res.status(404).json({ message: 'Ad not found' });
         }
 
+        const deletedMedia = await Media.findOneAndDelete({ id: adId });
+        if (!deletedMedia) {
+            console.log("ad deleted but media did not")
+        }else{
+            console.log("ad deleted and media also did")
+        }
         res.status(200).json({ message: 'Ad deleted successfully' });
 
         //const deletedSchedules = await Schedule.deleteMany({ ad_id: adId });
