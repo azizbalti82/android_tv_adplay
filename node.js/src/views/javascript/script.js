@@ -126,26 +126,32 @@ async function fetchAds(section) {
                 row.appendChild(type);
 
                 const upload = document.createElement('td');
-let uploaded_status = "";
+                let uploaded_status = "";
+                upload.textContent = "waiting";
+                upload.style.color = "grey";
 
-// Check if the media uploaded to the server or not
-fetch(url + "/media/" + device.id)
-  .then(response => {
-    if (response.status === 200) {
-      uploaded_status = "Uploaded";
-    } else if (response.status === 404) {
-      uploaded_status = "Not Uploaded";
-    } else {
-      uploaded_status = "Not Uploaded";
-    }
-    upload.textContent = uploaded_status; // Update the text content after fetch
-  })
-  .catch(error => {
-    uploaded_status = "Failed";
-    upload.textContent = uploaded_status; // Update in case of error
-  });
+                // Check if the media uploaded to the server or not
+                fetch(url + "/media/" + device.id)
+                .then(response => {
+                    if (response.status === 200) {
+                        uploaded_status = "Uploaded";
+                        upload.style.color = "green";
+                    } else if (response.status === 404) {
+                        uploaded_status = "Not Uploaded";
+                        upload.style.color = "red";
+                    } else {
+                        uploaded_status = "Not Uploaded";
+                        upload.style.color = "red";
+                    }
+                    upload.textContent = uploaded_status; // Update the text content after fetch
+                })
+                .catch(error => {
+                    uploaded_status = "Failed";
+                    upload.textContent = uploaded_status; // Update in case of error
+                    upload.style.color = "red";
+                });
 
-row.appendChild(upload);
+                row.appendChild(upload);
 
 
 
