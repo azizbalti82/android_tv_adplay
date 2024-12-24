@@ -131,7 +131,7 @@ async function fetchAds(section) {
                 upload.style.color = "grey";
 
                 // Check if the media uploaded to the server or not
-                fetch(url + "/media/" + device.id)
+                fetch(url + "/media/exist/" + device.id)
                 .then(response => {
                     if (response.status === 200) {
                         uploaded_status = "Uploaded";

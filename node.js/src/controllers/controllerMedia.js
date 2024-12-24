@@ -96,4 +96,30 @@ const delete_media = async (req, res) => {
     }
 };
 
-module.exports = { upload_media, get_media, delete_media };
+// Verify if media exists
+const verify_media_exists = async (req, res) => {
+    const { adId } = req.params;
+
+    if (!adId) return res.status(400).json({ message: 'Ad ID is required' });
+
+    try {
+        // Check if media exists in MongoDB collection
+        const media = await Media.findOne({ id: adId });
+        if (!media) return res.status(404).json({ message: 'Media not found' });
+
+        const bucket = getBucket();
+        
+        // Check if the file exists in GridFS
+        const files = await bucket.find({ filename: adId }).toArray();
+        if (files.length === 0) {
+            return res.status(404).json({ message: 'File not found in GridFS' });
+        }
+
+        res.status(200).json({ message: 'File exists in GridFS' });
+    } catch (err) {
+        console.error('Error in verify_media_exists:', err);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+module.exports = { upload_media, get_media, delete_media, verify_media_exists };
