@@ -62,7 +62,7 @@ const delete_ad = async (req, res) => {
     try {
         const { adId } = req.params;
         const deletedAd = await Ad.findOneAndDelete({ id: adId });
-        if (!deletedAd || !deletedMedia) {
+        if (!deletedAd) {
             return res.status(404).json({ message: 'Ad not found' });
         }
 
