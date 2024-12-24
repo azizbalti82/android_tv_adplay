@@ -598,9 +598,9 @@ async function addAd(event) {
         });
 
         if (response.ok) {
-            ad_id_being_uploaded = data.ad.id;
             alert('ad added successfully!');
             const data = await response.json();
+            ad_id_being_uploaded = data.ad.id;
             uploadAdMedia(data.ad.id,media)
             // Optional: Clear the form or reload the data
         } else {
