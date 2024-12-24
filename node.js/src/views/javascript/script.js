@@ -125,13 +125,28 @@ async function fetchAds(section) {
                 type.textContent = device.type;
                 row.appendChild(type);
 
-                const mediaUrl = document.createElement('td');
-                const link = document.createElement('a');
-                link.href = "media/"+device.id;
-                link.textContent = "Preview";
-                link.target = '_blank';
-                mediaUrl.appendChild(link);
-                row.appendChild(mediaUrl);
+                const upload = document.createElement('td');
+
+                const uploaded_status = ""
+                //check if the media uploaded to server or not
+                fetch(url+"/media/"+device.id)
+                .then(response => {
+                    if (response.status === 200) {
+                        uploaded_status = "Uploaded"
+                    } else if (response.status === 404) {
+                        uploaded_status = "Not Uploaded"
+                    } else {
+                        uploaded_status = "Not Uploaded"
+                    }
+                })
+                .catch(error => {
+                    uploaded_status = "faild"
+                });
+
+
+
+                upload.textContent(uploaded_status);
+                row.appendChild(upload);
 
 
                 const tools = document.createElement('td');
