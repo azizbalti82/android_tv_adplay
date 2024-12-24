@@ -1032,7 +1032,7 @@ function formatDate(dateString) {
     hours = hours ? hours : 12; // Hour '0' should be '12'
 
     // Return the formatted date string
-    return `${year}-${month}-${day} ${hours-1}:${minutes} ${ampm}`;
+    return `${year}-${month}-${day} ${hours}:${minutes} ${ampm}`;
 }
 function isDateAfter(date1, date2) {
     // Convert the dates to Date objects if they are not already
