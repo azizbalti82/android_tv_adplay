@@ -1,6 +1,7 @@
 const Ad = require('../models/modelAd');
 const { generateAdId } = require('../utils/generateID');
 const Schedule = require('../models/modelSchedule');
+const Media = require('../models/modelMedia');
 
 // Controller to create a new ad
 const create_ad = async (req, res) => {
@@ -61,8 +62,8 @@ const delete_ad = async (req, res) => {
     try {
         const { adId } = req.params;
         const deletedAd = await Ad.findOneAndDelete({ id: adId });
-
-        if (!deletedAd) {
+        const deletedMedia = await Media.findOneAndDelete({ id: adId });
+        if (!deletedAd || !deletedMedia) {
             return res.status(404).json({ message: 'Ad not found' });
         }
 
