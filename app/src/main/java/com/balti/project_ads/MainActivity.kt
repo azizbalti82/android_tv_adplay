@@ -6,14 +6,10 @@ import android.os.CountDownTimer
 import android.util.Log
 import android.view.View
 import androidx.fragment.app.FragmentActivity
-import androidx.work.PeriodicWorkRequestBuilder
-import androidx.work.WorkManager
 import com.balti.project_ads.backend.ApiCalls
 import com.balti.project_ads.backend.Status
-import com.balti.project_ads.storage.shared
 import com.balti.project_ads.databinding.ActivityMainBinding
-import com.balti.project_ads.workers.FetchSchedules
-import java.util.concurrent.TimeUnit
+import com.balti.project_ads.storage.shared
 
 
 class MainActivity : FragmentActivity() {
@@ -200,16 +196,7 @@ class MainActivity : FragmentActivity() {
     // functionality ---------------------------------------------
     private fun FetchSchedulesWorker(context: Context) {
         //fetch schedules every 15mn
-        val workRequest = PeriodicWorkRequestBuilder<FetchSchedules>(
-            15, TimeUnit.MINUTES // Repeat interval
-        ).build()
 
-        // Enqueue the periodic work
-        WorkManager.getInstance(context).enqueueUniquePeriodicWork(
-            "My12HourTask",
-            androidx.work.ExistingPeriodicWorkPolicy.KEEP, // Prevents creating duplicates
-            workRequest
-        )
     }
     private fun rotateScreen() {
         val root: View = bindHome.root

@@ -135,10 +135,21 @@ class data {
         }
 
         // show ads functions ----------------------------------------------------------------------
-        fun showMedia(context: Context, mediaType: String, mediaFile: File?,in_group:Boolean) {
+        fun showMedia(
+            context: Context,
+            mediaType: String,
+            mediaFile: File?,
+            in_group: Boolean,
+            index: Int
+        ) {
             if(in_group){
-                //add this ad to the ads_group
-                ads_group.add(AdGroupItem(mediaType,mediaFile))
+                Log.i("media_player", "index of this ad is: $index")
+                //add this ad to the ads_group (insert it in its exact order)
+                if (index > ads_group.size) {
+                    ads_group.add(AdGroupItem(mediaType,mediaFile)) // Add at the end
+                } else {
+                    ads_group.add(index,AdGroupItem(mediaType,mediaFile))
+                }
 
                 Log.d("media_player", "GROUP: "+ ads_group.toString())
                 playAdsSequentially(context, ads_group)
@@ -367,7 +378,7 @@ class data {
                     // we got schedules
                     if (schedules.isEmpty()) {
                         Log.d(TAG, "getSchdules: there is no schedules")
-                        showMedia(c, "", null,false)
+                        showMedia(c, "", null, false,0)
                     } else {
                         Log.d(TAG, "getSchdules: there is schedules, lets save them")
                         //show users the first schedule
@@ -388,9 +399,12 @@ class data {
                                 val ids = s.ad_id!!.split(";")
                                 val inGroup = s.ad_id!!.contains(";")
                                 Log.d(TAG, "getSchdules: total of ads in this schedule: ${ids.size}")
+
+                                var index = -1
                                 for (id in ids) {
                                     //1) get the media type from the ad
                                     apiCalls.getMediaTypeFromAd(id) { type ->
+                                        index++
                                         Log.d(TAG, "getSchdules: Extracted ad is 'id': $id, 'type': $type")
                                         if(type!=null) {
                                             //2) save media in the storage (if that ads media not already saved)
@@ -410,19 +424,19 @@ class data {
                                                         //we got response from server
                                                         if(result.isEmpty()){
                                                             Log.d(TAG, "getSchdules: invalid media ID:$id")
-                                                            scheduleAd(c, id, "invalid", s.start!!, s.end!!, inGroup)
+                                                            scheduleAd(c, id, "invalid", s.start!!, s.end!!, inGroup,index)
                                                         }else{
                                                             Log.d(TAG, "getSchdules: downloaded successfully")
                                                             saveFileToStorage(c, id, result)
                                                             //now when we got the ad : start scheduling it
-                                                            scheduleAd(c, id, type, s.start!!, s.end!!, inGroup)
+                                                            scheduleAd(c, id, type, s.start!!, s.end!!, inGroup,index)
                                                         }
                                                     }
                                                 }
                                                 else{
                                                     //file already downloaded
                                                     Log.d(TAG, "getSchdules: File already downloaded id:$id")
-                                                    scheduleAd(c, id, type, s.start!!, s.end!!, inGroup)
+                                                    scheduleAd(c, id, type, s.start!!, s.end!!, inGroup,index)
                                                 }
                                             }
                                         }
@@ -432,7 +446,7 @@ class data {
                                 Log.d(TAG, "getSchdules: schedule is null")
                             }
                         }
-                        showMedia(c, "", null,false)
+                        showMedia(c, "", null, false, 0)
                     }
                 }
                 else {
@@ -440,10 +454,11 @@ class data {
                     show_offline_if_unable_to_load_schedules(c)
                 }
             }
-        }
-        fun scheduleAd(c:Context,adId: String, mediaType:String, startTime: Date, endTime: Date, inGroup:Boolean) {
-            Log.d("worker_setup_schedule", "scheduleAd: started scheduling ad: $adId, type: $mediaType, inGroup: $inGroup")
 
+            scheduleRefresh(c)
+        }
+        fun scheduleAd(c:Context,adId: String, mediaType:String, startTime: Date, endTime: Date, inGroup:Boolean,index:Int) {
+            Log.d("worker_setup_schedule", "scheduleAd: started scheduling ad: $adId, type: $mediaType, inGroup: $inGroup")
             val handler = Handler(Looper.getMainLooper())
             val hour = 3600000
             val currentTime = System.currentTimeMillis()
@@ -455,19 +470,26 @@ class data {
                 handler.postDelayed({
                     val file = getFile(c, adId)
                     Log.d("worker_setup_schedule", "${adId} started playing: $adId with media type: $mediaType ,ingroup:$inGroup file:${file?.absolutePath}")
-                    showMedia(c.applicationContext, mediaType, file,inGroup)
+                    showMedia(c.applicationContext, mediaType, file,inGroup,index)
                 }, delay_to_start)
 
                 //when the media is done playing
                 handler.postDelayed({
-                    showMedia(c.applicationContext, "", null,false)
+                    showMedia(c.applicationContext, "", null, false, index)
                 }, delay_to_end)
             } else {
                 // If the scheduled time has already passed, do nothing
                 Log.d("worker_setup_schedule", "scheduleAd: Scheduled time has already passed. Action not scheduled.")
             }
         }
-
+        fun scheduleRefresh(c:Context){
+            val handler = Handler(Looper.getMainLooper())
+            //rescan the schedules after 5mn again
+            handler.postDelayed({
+                Log.d("worker_setup_schedule", "started fetching schedules (5mn passed)")
+                getSchdules(c, Companion.deviceId)
+            }, 5 * 60 * 1000)
+        }
 
 
         // ui functions ----------------------------------------------------------------------------
