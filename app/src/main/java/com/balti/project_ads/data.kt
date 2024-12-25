@@ -370,6 +370,7 @@ class data {
         // schedules management functions ----------------------------------------------------------
         @OptIn(DelicateCoroutinesApi::class)
         fun getSchdules(c:Context, deviceId: String) {
+            Toast.makeText(c, "Refreshing...", Toast.LENGTH_SHORT).show()
             Log.d(TAG, "getSchdules: started getting schedules for deviceID: $deviceId")
             ads_group.clear() //clear the ads group
 
@@ -396,15 +397,13 @@ class data {
                         //1) schedule them
                         for (s in schedules) {
                             if (s != null) {
-                                val ids = s.ad_id!!.split(";")
+                                val ids = s.ad_id!!.split(";").toMutableList()
                                 val inGroup = s.ad_id!!.contains(";")
-                                Log.d(TAG, "getSchdules: total of ads in this schedule: ${ids.size}")
+                                Log.d(TAG, "getSchdules: total of ads in this schedule: ${ids.size}:ids: $ids")
 
-                                var index = -1
                                 for (id in ids) {
                                     //1) get the media type from the ad
                                     apiCalls.getMediaTypeFromAd(id) { type ->
-                                        index++
                                         Log.d(TAG, "getSchdules: Extracted ad is 'id': $id, 'type': $type")
                                         if(type!=null) {
                                             //2) save media in the storage (if that ads media not already saved)
@@ -424,19 +423,19 @@ class data {
                                                         //we got response from server
                                                         if(result.isEmpty()){
                                                             Log.d(TAG, "getSchdules: invalid media ID:$id")
-                                                            scheduleAd(c, id, "invalid", s.start!!, s.end!!, inGroup,index)
+                                                            scheduleAd(c, id, "invalid", s.start!!, s.end!!, inGroup,ids.indexOf(id))
                                                         }else{
                                                             Log.d(TAG, "getSchdules: downloaded successfully")
                                                             saveFileToStorage(c, id, result)
                                                             //now when we got the ad : start scheduling it
-                                                            scheduleAd(c, id, type, s.start!!, s.end!!, inGroup,index)
+                                                            scheduleAd(c, id, type, s.start!!, s.end!!, inGroup,ids.indexOf(id))
                                                         }
                                                     }
                                                 }
                                                 else{
                                                     //file already downloaded
                                                     Log.d(TAG, "getSchdules: File already downloaded id:$id")
-                                                    scheduleAd(c, id, type, s.start!!, s.end!!, inGroup,index)
+                                                    scheduleAd(c, id, type, s.start!!, s.end!!, inGroup,ids.indexOf(id))
                                                 }
                                             }
                                         }
@@ -486,9 +485,9 @@ class data {
             val handler = Handler(Looper.getMainLooper())
             //rescan the schedules after 5mn again
             handler.postDelayed({
-                Log.d("worker_setup_schedule", "started fetching schedules (5mn passed)")
+                Log.d("worker_refresh", "started fetching schedules (5mn passed)")
                 getSchdules(c, Companion.deviceId)
-            }, 5 * 60 * 1000)
+            }, 10 * 60 * 1000)
         }
 
 
