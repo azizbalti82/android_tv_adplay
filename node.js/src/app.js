@@ -64,7 +64,7 @@ app.use(routMedia);
 
 //routes ------------------------------------------------------------------------------------------------------------
 app.get('/date', (req, res) => {  
-    res.send(getCurrentDateTime());
+    res.send(getCurrentDateTime().toString());
 });
 
 
