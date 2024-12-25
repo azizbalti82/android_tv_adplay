@@ -1,7 +1,6 @@
 const Schedule = require('../models/modelSchedule');
 const { generateScheduleId } = require('../utils/generateID');
-const { getCurrentDateTime } = require('../utils/date');
-const { now } = require('mongoose');
+const { getCurrentDateTime ,convertToMillis} = require('../utils/date');
 
 // Controller to create a new schedule
 const create_schedule = async (req, res) => {
@@ -37,8 +36,8 @@ const create_schedule = async (req, res) => {
             id: generatedID,
             ad_id: req.body.ad_id,
             device_id: req.body.device_id,
-            start: req.body.start,
-            end: req.body.end,
+            start: convertToMillis(req.body.start),
+            end: convertToMillis(req.body.end),
         });
 
         // Save the schedule to the database

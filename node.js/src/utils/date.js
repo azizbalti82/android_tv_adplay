@@ -6,7 +6,14 @@ function getCurrentDateTime() {
     return tunisiaTime.valueOf(); // Get time in milliseconds
 }
 
+function convertToMillis(dateString) {
+    const date = new Date(dateString);  // Parse the ISO 8601 string
+    return date.getTime();  // Return the time in milliseconds
+}
+
+
 
 module.exports = {
     getCurrentDateTime,
+    convertToMillis
 };
