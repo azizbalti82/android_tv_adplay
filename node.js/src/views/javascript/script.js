@@ -269,7 +269,7 @@ async function fetchSchedules() {
                     // For each schedule, update the status depending on the date: waiting | showing now | completed
                     start_sch = schedule.start;
                     end_sch = schedule.end;
-                    current_date = getServerCurrentDate()
+                    current_date = await getServerCurrentDate(); 
 
                     let statusText = "";
                 
