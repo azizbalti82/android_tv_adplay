@@ -21,7 +21,12 @@ const upload_media = async (req, res) => {
         if (!file) return res.status(400).json({ message: 'No file uploaded' });
 
         const bucket = getBucket();
-        const writeStream = bucket.openUploadStream(adId, { contentType: file.mimetype });
+        const writeStream = bucket.openUploadStream(adId, {
+            contentType: file.mimetype,
+            allowDiskUse: true 
+        });
+        
+        //const writeStream = bucket.openUploadStream(adId, { contentType: file.mimetype });
 
         writeStream.end(file.buffer);
 
