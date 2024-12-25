@@ -78,12 +78,21 @@ const get_media = async (req, res) => {
     if (!adId) return res.status(400).json({ message: 'Ad ID is required' });
 
     try {
+        console.log('Fetching media for Ad ID:', adId);
+
         const media = await Media.findOne({ id: adId });
         if (!media) return res.status(404).json({ message: 'Media not found' });
 
         const bucket = getBucket();
-        const downloadStream = bucket.openDownloadStreamByName(adId);
 
+        // Confirm file exists in GridFS
+        const files = await bucket.find({ filename: adId }).toArray();
+        if (files.length === 0) {
+            return res.status(404).json({ message: 'File not found in GridFS' });
+        }
+
+        // Open download stream and pipe to response
+        const downloadStream = bucket.openDownloadStreamByName(adId);
         downloadStream.pipe(res);
 
         downloadStream.on('error', (err) => {
@@ -95,6 +104,7 @@ const get_media = async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 };
+
 
 
 // Verify if media exists
