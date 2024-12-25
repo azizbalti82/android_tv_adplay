@@ -119,12 +119,13 @@ const verify_media_exists = async (req, res) => {
 
         const bucket = getBucket();
 
-        const files = await bucket.find({ filename: adId }).toArray();
+        // Allow disk use for sorting
+        const files = await bucket.find({ filename: adId }, { allowDiskUse: true }).toArray();
         if (files.length === 0) {
             return res.status(404).json({ message: 'File not found in GridFS' });
         }
 
-        // Attempt to open a read stream to validate file data
+        // Try to read the file
         const readStream = bucket.openDownloadStreamByName(adId);
         readStream.on('data', () => {}); // Validate stream reads
         readStream.on('error', (err) => {
@@ -140,6 +141,7 @@ const verify_media_exists = async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 };
+
 
 
 module.exports = { upload_media, get_media, delete_media, verify_media_exists };
