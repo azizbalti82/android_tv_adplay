@@ -2,6 +2,7 @@ const Ad = require('../models/modelAd');
 const { generateAdId } = require('../utils/generateID');
 const Schedule = require('../models/modelSchedule');
 const Media = require('../models/modelMedia');
+const { getCurrentDateTime} = require('../utils/date');
 
 // Controller to create a new ad
 const create_ad = async (req, res) => {
@@ -17,6 +18,7 @@ const create_ad = async (req, res) => {
             type: req.body.type,
             mediaUrl: req.body.mediaUrl,
             mediaExtension: req.body.mediaExtension,
+            createdAt: getCurrentDateTime()
         });
 
         // Save the ad to the database

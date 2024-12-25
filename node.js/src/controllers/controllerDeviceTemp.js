@@ -1,6 +1,6 @@
 const DeviceTemp = require('../models/modelDeviceTemp');
 const { generateDeviceId } = require('../utils/generateID');
-
+const { getCurrentDateTime} = require('../utils/date');
 
 // Controller to create a new device
 const createDevice = async (req, res) => {
@@ -11,6 +11,7 @@ const createDevice = async (req, res) => {
         // Create a new device with the generated ID
         const newDevice = new DeviceTemp({
             id: generatedID,
+            createdAt: getCurrentDateTime()
         });
 
         // Save the device to the database
