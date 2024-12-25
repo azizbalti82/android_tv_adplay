@@ -250,18 +250,18 @@ async function fetchSchedules() {
                     device_id.textContent = device.name;
                     row.appendChild(device_id);
 
-
-                    const start = document.createElement('td');
-                    start.textContent = schedule.start;
-                    row.appendChild(start);
-
-                    const end = document.createElement('td');
-                    end.textContent = schedule.end+" ffff";
-                    row.appendChild(end);
-
                     const orientation = document.createElement('td');
                     orientation.textContent = schedule.orientation;
                     row.appendChild(orientation);
+
+
+                    const start = document.createElement('td');
+                    start.textContent = formatDate(schedule.start);
+                    row.appendChild(start);
+
+                    const end = document.createElement('td');
+                    end.textContent = formatDate(schedule.end);
+                    row.appendChild(end);
 
 
                     // Create the table cell for the status
