@@ -5,9 +5,8 @@ const { upload_media, get_media,delete_media,verify_media_exists } = require('..
 const router = express.Router();
 
 // Configure multer
-// Use multer memory storage
 const storage = multer.memoryStorage();
-const upload = multer({ storage });
+const upload = multer({ storage, limits: { fileSize: 200 * 1024 * 1024 } }); // Limit to 50MB
 
 // Upload media for a specific ad
 router.post('/media/:adId', upload.single('file'), upload_media);
