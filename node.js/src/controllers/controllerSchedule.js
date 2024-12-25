@@ -7,36 +7,44 @@ const create_schedule = async (req, res) => {
     try {
         // Generate a unique ID
         const generatedID = await generateScheduleId();
-
         
-        // check if the start and end dates are valid
-        current = getCurrentDateTime();
-        if (req.body.start < current || req.body.start > req.body.end) {
+        // Convert the start and end to milliseconds
+        const startMillis = convertToMillis(req.body.start);
+        const endMillis = convertToMillis(req.body.end);
+        
+        // Get the current date time in milliseconds
+        const current = getCurrentDateTime();
+        
+        // Validate start and end dates
+        if (startMillis < current || startMillis > endMillis) {
             return res.status(500).json({
                 message: "The date must meet the following conditions:\nThe start date must be before the end date.\nThe start date must be later than the current date."
             });
         }
-        // Check for conflicting schedules: the period of showing this schedule already taken by other schedule for this device
+        
+        // Check for conflicting schedules
         const conflictingSchedules = await Schedule.find({
             device_id: req.body.device_id,
             $or: [
-                { start: { $lte: req.body.end }, end: { $gte: req.body.start } }, // Overlaps the range
+                { start: { $lte: endMillis }, end: { $gte: startMillis } }, // Overlaps the range
             ],
         });
+        
         if (conflictingSchedules.length > 0) {
             return res.status(400).json({
                 message: 'There is a conflict with an existing schedule for this device.',
             });
         }
     
-        console.log("schedule start: "+req.body.start);
+        console.log("schedule start: " + startMillis);
+
         // Create a new schedule with the generated ID
         const newSchedule = new Schedule({
             id: generatedID,
             ad_id: req.body.ad_id,
             device_id: req.body.device_id,
-            start: convertToMillis(req.body.start),
-            end: convertToMillis(req.body.end),
+            start: startMillis,
+            end: endMillis,
         });
 
         // Save the schedule to the database
@@ -48,6 +56,7 @@ const create_schedule = async (req, res) => {
         res.status(500).json({ message: 'server error' });
     }
 };
+
 
 // Controller to get all schedules
 const getAll_schedules = async (req, res) => {
@@ -72,10 +81,9 @@ const getAll_by_device_schedules = async (req, res) => {
     }
 };
 
-
 // Controller to update a schedule by ID
 const update_schedule = async (req, res) => {
-    try {
+    try {/*
         const { scheduleId } = req.params;
        
         // check if the start and end dates are valid
@@ -108,6 +116,7 @@ const update_schedule = async (req, res) => {
         }
 
         res.status(200).json({ message: 'Schedule updated successfully', schedule: updatedSchedule });
+        */
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Server error' });
