@@ -909,20 +909,15 @@ function hideAllForms() {
         form.style.display = 'none';
     });
 }
-async function getServerCurrentDate(formatted = false) {
-    try {
-        const response = await fetch('/date');
-        const serverDate = await response.text();
-
-        if (formatted) {
-            return formatDate(serverDate);
-        }
-        
-        return serverDate;
-    } catch (error) {
-        console.error('Error fetching server date:', error);
-        throw error; // Re-throw the error if needed
-    }
+async function getServerCurrentDate() {
+    fetch('/date')
+    .then(response => response.json())
+    .then(milliseconds => {
+        return milliseconds;
+    })
+    .catch(error => {
+        return null;
+    });
 }
 function formatDate(milliseconds) {
     // Create a Date object using the given milliseconds

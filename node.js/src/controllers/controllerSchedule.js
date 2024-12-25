@@ -8,7 +8,7 @@ const create_schedule = async (req, res) => {
         // Generate a unique ID
         const generatedID = await generateScheduleId();
 
-        /*
+        
         // check if the start and end dates are valid
         current = new Date(getCurrentDateTime());
         timeAlreadyUsed = false
@@ -31,7 +31,7 @@ const create_schedule = async (req, res) => {
                 message: 'There is a conflict with an existing schedule for this device.',
             });
         }
-            */
+    
 
         // Create a new schedule with the generated ID
         const newSchedule = new Schedule({
