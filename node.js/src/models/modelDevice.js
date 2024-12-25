@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { getCurrentDateTime} = require('../utils/date');
 
 const DeviceSchema = new mongoose.Schema({
     id: {
@@ -16,12 +17,12 @@ const DeviceSchema = new mongoose.Schema({
         default: 'offline' 
     },
     createdAt: { 
-        type: Date, 
-        default: Date.now 
+        type: Number, 
+        default: getCurrentDateTime()
     },
     lastSeen: { 
-        type: Date, 
-        default: Date.now 
+        type: Number, 
+        default: getCurrentDateTime()
     }
 });
 

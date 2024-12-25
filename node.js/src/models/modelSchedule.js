@@ -15,11 +15,11 @@ const ScheduleSchema = new mongoose.Schema({
         required: true 
     },
     start: { 
-        type: Date, 
+        type: Number, 
         required: true 
     },
     end: { 
-        type: Date, 
+        type: Number, 
         required: true 
     },
     orientation: {

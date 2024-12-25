@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { getCurrentDateTime} = require('../utils/date');
 
 const DeviceTempSchema = new mongoose.Schema({
     id: {
@@ -12,8 +13,8 @@ const DeviceTempSchema = new mongoose.Schema({
         default: 'waiting' 
     },
     createdAt: { 
-        type: Date, 
-        default: Date.now 
+        type: Number, 
+        default: getCurrentDateTime()
     },
 });
 

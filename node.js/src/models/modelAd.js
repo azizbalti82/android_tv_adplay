@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { getCurrentDateTime} = require('../utils/date');
 
 const AdSchema = new mongoose.Schema({
     id: {
@@ -30,13 +31,9 @@ const AdSchema = new mongoose.Schema({
         default: ''
     },
     createdAt: { 
-        type: Date, 
-        default: Date.now 
+        type: Number, 
+        default: getCurrentDateTime()
     },
-    updatedAt: { 
-        type: Date, 
-        default: Date.now 
-    }
 });
 
 module.exports = mongoose.model('Ad', AdSchema);
