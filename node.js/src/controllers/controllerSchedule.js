@@ -31,13 +31,15 @@ const create_schedule = async (req, res) => {
             });
         }
 
+        console.log("start time:"+convertToMillis(req.body.start).toString())
+
         // Create a new schedule with the generated ID
         const newSchedule = new Schedule({
             id: generatedID,
             ad_id: req.body.ad_id,
             device_id: req.body.device_id,
-            start: convertToMillis(req.body.start),
-            end: convertToMillis(req.body.end),
+            start: convertToMillis(req.body.start).toString(),
+            end: convertToMillis(req.body.end).toString(),
         });
 
         // Save the schedule to the database
