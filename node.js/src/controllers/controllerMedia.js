@@ -91,13 +91,13 @@ const get_media = async (req, res) => {
         const bucket = getBucket();
 
         // Confirm file exists in GridFS
-        
-        // Modify this part of your code for large find operations
         const files = await bucket.find({ filename: adId }).toArray({ allowDiskUse: true });
 
+        /*
         if (files.length === 0) {
             return res.status(404).json({ message: 'File not found in GridFS' });
         }
+            */
 
         // Open download stream and pipe to response
         const downloadStream = bucket.openDownloadStreamByName(adId);
