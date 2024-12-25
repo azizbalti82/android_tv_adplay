@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const { getCurrentDateTime} = require('../utils/date');
 
 const DeviceSchema = new mongoose.Schema({
     id: {

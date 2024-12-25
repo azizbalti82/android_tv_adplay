@@ -1,6 +1,7 @@
 const Device = require('../models/modelDevice');
 const DeviceTemp = require('../models/modelDeviceTemp');
 const Schedule = require('../models/modelSchedule');
+const { getCurrentDateTime} = require('../utils/date');
 
 
 // Controller to create a new device
