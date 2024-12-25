@@ -18,11 +18,11 @@ const DeviceSchema = new mongoose.Schema({
     },
     createdAt: { 
         type: Number, 
-        default: getCurrentDateTime()
+        required: true,
     },
     lastSeen: { 
         type: Number, 
-        default: getCurrentDateTime()
+        required: true,
     }
 });
 

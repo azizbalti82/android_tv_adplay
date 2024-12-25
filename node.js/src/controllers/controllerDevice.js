@@ -21,6 +21,8 @@ const createDevice = async (req, res) => {
         const newDevice = new Device({
             id: req.body.id,
             name: req.body.name,
+            createdAt: getCurrentDateTime(),
+            lastSeen: getCurrentDateTime()
         });
 
         // Save the device to the database
