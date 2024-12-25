@@ -21,14 +21,16 @@ const upload_media = async (req, res) => {
         if (!file) return res.status(400).json({ message: 'No file uploaded' });
 
         const bucket = getBucket();
+
+        // Create a stream for the uploaded file
+        const readStream = file.stream;
+
         const writeStream = bucket.openUploadStream(adId, {
             contentType: file.mimetype,
-            allowDiskUse: true 
+            allowDiskUse: true // Allow MongoDB to use disk space for large files
         });
-        
-        //const writeStream = bucket.openUploadStream(adId, { contentType: file.mimetype });
 
-        writeStream.end(file.buffer);
+        readStream.pipe(writeStream); // Pipe the file directly into GridFS
 
         writeStream.on('finish', async () => {
             await new Media({ id: adId }).save();
@@ -44,6 +46,7 @@ const upload_media = async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 };
+
 
 const delete_media = async (req, res) => {
     const { adId } = req.params;
@@ -93,12 +96,10 @@ const get_media = async (req, res) => {
         // Confirm file exists in GridFS
         const files = await bucket.find({ filename: adId }).toArray({ allowDiskUse: true });
 
-        /*
         if (files.length === 0) {
             return res.status(404).json({ message: 'File not found in GridFS' });
         }
-            */
-
+        
         // Open download stream and pipe to response
         const downloadStream = bucket.openDownloadStreamByName(adId);
         downloadStream.pipe(res);
