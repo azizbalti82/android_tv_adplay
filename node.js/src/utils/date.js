@@ -1,13 +1,10 @@
+const moment = require('moment-timezone');
+
 function getCurrentDateTime() {
-    const now = new Date();
-
-    // Convert to Tunisia's timezone
-    const tunisiaTime = new Date(now.toLocaleString('en-US', { timeZone: 'Africa/Tunis' }));
-
-    // Return the time in milliseconds
-    return tunisiaTime.getTime();
+    // Get current time in Tunisia using moment-timezone
+    const tunisiaTime = moment.tz('Africa/Tunis');
+    return tunisiaTime.valueOf(); // Get time in milliseconds
 }
-
 
 
 module.exports = {
