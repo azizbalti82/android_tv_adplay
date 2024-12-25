@@ -10,16 +10,13 @@ const create_schedule = async (req, res) => {
 
         
         // check if the start and end dates are valid
-        current = new Date(getCurrentDateTime());
-        timeAlreadyUsed = false
-        if (timeAlreadyUsed || new Date(req.body.start) < current || new Date(req.body.start) > new Date(req.body.end)) {
+        current = getCurrentDateTime();
+        if (req.body.start < current || req.body.start > req.body.end) {
             return res.status(500).json({
-                message: 'Date must be: \n1) unique for the current device \n2) start must be before end\n3) start must be greater than the current date'
+                message: "The date must meet the following conditions:\nThe start date must be before the end date.\nThe start date must be later than the current date."
             });
         }
         // Check for conflicting schedules: the period of showing this schedule already taken by other schedule for this device
-        // deviceid==this_device_id && start_this>=start_other && end_this<=end_other
-        console.log("add schedule: selected device="+req.body.device_id)
         const conflictingSchedules = await Schedule.find({
             device_id: req.body.device_id,
             $or: [
@@ -32,7 +29,7 @@ const create_schedule = async (req, res) => {
             });
         }
     
-
+        console.log("schedule start: "+req.body.start);
         // Create a new schedule with the generated ID
         const newSchedule = new Schedule({
             id: generatedID,
