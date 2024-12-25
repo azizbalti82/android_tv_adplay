@@ -252,11 +252,11 @@ async function fetchSchedules() {
 
 
                     const start = document.createElement('td');
-                    start.textContent = formatDate(schedule.start);
+                    start.textContent = schedule.start;
                     row.appendChild(start);
 
                     const end = document.createElement('td');
-                    end.textContent = formatDate(schedule.end);
+                    end.textContent = schedule.end+" ffff";
                     row.appendChild(end);
 
                     const orientation = document.createElement('td');
@@ -267,11 +267,16 @@ async function fetchSchedules() {
                     // Create the table cell for the status
                     const statusCell = document.createElement('td');
                     // For each schedule, update the status depending on the date: waiting | showing now | completed
-                    start_sch = new Date(formatDate(schedule.start));
-                    end_sch = new Date(formatDate(schedule.end));
+                    start_sch = new Date(schedule.start);
+                    end_sch = new Date(schedule.end);
                     let statusText = "";  // Use a different name for the status text variable
+                    current_date = new Date(getServerCurrentDate())
 
-                    current_date = getServerCurrentDate()
+
+                    console.log('current date: '+current_date)
+                    console.log('start date: '+start_sch)
+                    console.log('end date: '+end_sch)
+
                     if (start_sch > current_date) {
                         statusText = "waiting";
                         statusCell.style.color = "orange";
