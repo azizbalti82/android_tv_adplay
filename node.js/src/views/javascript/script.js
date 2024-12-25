@@ -923,27 +923,26 @@ async function getServerCurrentDate(formatted = false) {
         throw error; // Re-throw the error if needed
     }
 }
+function formatDate(milliseconds) {
+    // Create a Date object using the given milliseconds
+    const date = new Date(milliseconds);
 
-function formatDate(dateString) {
-    // Check if the dateString is null or invalid
-    if (dateString === null || isNaN(new Date(dateString))) {
-        return 'N/A';
-    }
-    const date = new Date(dateString);
+    // Convert to Tunisia's timezone
+    const tunisiaTime = new Date(date.toLocaleString('en-US', { timeZone: 'Africa/Tunis' }));
 
-    // Get the year, month, day, hours, minutes, and AM/PM
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed, so we add 1
-    const day = String(date.getDate()).padStart(2, '0');
-    
-    let hours = date.getHours();
-    const minutes = String(date.getMinutes()).padStart(2, '0');
+    // Get the date in YYYY-MM-DD format
+    const formattedDate = tunisiaTime.toISOString().split('T')[0];
+
+    // Extract hours and minutes
+    let hours = tunisiaTime.getHours();
+    const minutes = tunisiaTime.getMinutes().toString().padStart(2, '0');
+
+    // Determine AM/PM
     const ampm = hours >= 12 ? 'PM' : 'AM';
-    hours = hours % 12;
-    hours = hours ? hours : 12; // Hour '0' should be '12'
+    hours = hours % 12 || 12; // Convert to 12-hour format, treating 0 as 12
 
-    // Return the formatted date string
-    return `${year}-${month}-${day} ${hours}:${minutes} ${ampm}`;
+    // Combine the date and formatted time
+    return `${formattedDate} ${hours}:${minutes} ${ampm}`;
 }
 function isDateAfter(date1, date2) {
     // Convert the dates to Date objects if they are not already
