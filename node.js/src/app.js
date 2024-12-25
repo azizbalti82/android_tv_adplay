@@ -64,7 +64,11 @@ app.use(routMedia);
 
 //routes ------------------------------------------------------------------------------------------------------------
 app.get('/date', (req, res) => {
-    res.send(getCurrentDateTime());
+    app.get('/date', (req, res) => {
+        const tunisiaDateTime = new Date().toLocaleString('en-US', { timeZone: 'Africa/Tunis' });
+        res.send(tunisiaDateTime);
+    });
+    
 });
 
 
