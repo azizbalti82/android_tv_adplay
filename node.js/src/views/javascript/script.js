@@ -911,6 +911,7 @@ async function getServerCurrentDate(formatted = false) {
         if (formatted) {
             return formatDate(serverDate);
         }
+        
         return serverDate;
     } catch (error) {
         console.error('Error fetching server date:', error);
