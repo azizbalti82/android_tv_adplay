@@ -62,7 +62,7 @@ app.use(routMedia);
 
 //routes ------------------------------------------------------------------------------------------------------------
 app.get('/date', (req, res) => {
-    const currentDateTime = new Date(Date.now());
+    const currentDateTime = Date.now();
     res.send(currentDateTime.toString());
 });
 
