@@ -190,129 +190,7 @@ async function fetchAds(section) {
         console.error('Error fetching data:', error);
     }
 }
-/* this is an old working version, but i had problem with duplications in the table (nnot in the server) that is why i commented it out
-async function fetchSchedules() {
-    const tableBody = document.querySelector('#scheduleTable tbody');
-    let count_fetched = 0;
-    try {
-        // Clear existing rows (if any)
-        tableBody.innerHTML = '';
 
-        // Fetch data from the API
-        const response = await fetch(url+'/schedules');
-        const result = await response.json();
-
-        // Check if there are any devices
-        if (result.length > 0) {
-            // Iterate over the devices and create table rows
-            for (const device of result) {
-                const row = document.createElement('tr');
-
-                try {
-                    // Fetch additional details for the device and ad
-                    const deviceResponse = await fetch(`url+'/devices/${device.device_id}`);
-                    const deviceData = await deviceResponse.json();
-
-                    const adResponse = await fetch(`url+'/ads/${device.ad_id}`);
-                    const adData = await adResponse.json();
-                    
-                    // Populate the table row
-                    const ad_id = document.createElement('td');
-                    ad_id.textContent = adData.ad.title;
-                    row.appendChild(ad_id);
-                
-
-                    const device_id = document.createElement('td');
-                    device_id.textContent = deviceData.Device.name;
-                    row.appendChild(device_id);
-
-                    console.log("device name is:"+deviceData.Device.name);
-
-                    const start = document.createElement('td');
-                    start.textContent = formatDate(device.start);
-                    row.appendChild(start);
-
-                    const end = document.createElement('td');
-                    end.textContent = formatDate(device.end);
-                    row.appendChild(end);
-
-                    const orientation = document.createElement('td');
-                    orientation.textContent = device.orientation;
-                    row.appendChild(orientation);
-
-
-                    // Create the table cell for the status
-                    const statusCell = document.createElement('td');
-                    // For each schedule, update the status depending on the date: waiting | showing now | completed
-                    start_sch = new Date(device.start);
-                    end_sch = new Date(device.end);
-                    let statusText = "";  // Use a different name for the status text variable
-
-                    if (start_sch > Date.now()) {
-                        statusText = "waiting";
-                        statusCell.style.color = "orange";
-                    } else if (start_sch < Date.now() && end_sch > Date.now()) {
-                        statusText = "Playing now";
-                        statusCell.style.color = "green";
-                    } else if (Date.now() > end_sch) {
-                        statusText = "Completed";
-                        statusCell.style.color = "red";
-                    }
-                    statusCell.textContent = statusText;
-                    row.appendChild(statusCell);
-
-
-                    const tools = document.createElement('td');
-                    const editButton = document.createElement('button');
-                    editButton.textContent = 'Edit';
-                    editButton.onclick = () => editScheduleToggleForm(device); // Edit functionality
-                    editButton.classList.add('btn', 'btn-primary');
-                    editButton.style.marginRight = '5px';
-
-                    const deleteButton = document.createElement('button');
-                    deleteButton.textContent = 'Delete';
-                    deleteButton.onclick = () => deleteSchedule(device.id); // Delete functionality
-                    deleteButton.classList.add('btn', 'btn-danger');
-
-                    tools.appendChild(editButton);
-                    tools.appendChild(deleteButton);
-                    row.appendChild(tools);
-
-                    tableBody.appendChild(row);
-
-                    count_fetched++
-                } catch (e) {
-                    console.error('Error fetching additional data:', e.message);
-
-                    
-                    // Delete the schedule if the ad or device is missing
-                    if (e.message.includes('undefined')) {
-                        await fetch(`url+'/schedules/${device.id}`, { method: 'DELETE' });
-                        console.log(`Deleted schedule with ID: ${device.id}`);
-                    }
-                }
-            }
-        }
-    } catch (error) {
-        console.error('Error fetching schedules:', error);
-    }finally{
-        if(count_fetched===0){
-            // If no devices, show the "Empty" row
-            const emptyRow = document.createElement('tr');
-            const emptyCell = document.createElement('td');
-            emptyCell.colSpan = 7; // Span across all columns
-            emptyCell.style.textAlign = 'center';
-            emptyCell.style.verticalAlign = 'middle';
-            emptyCell.textContent = 'Empty';
-            emptyRow.appendChild(emptyCell);
-            tableBody.appendChild(emptyRow);
-        }
-    }
-
-    
-    
-}
-*/
 async function fetchSchedules() {
     const tableBody = document.querySelector('#scheduleTable tbody');
     let count_fetched = 0;
@@ -393,13 +271,14 @@ async function fetchSchedules() {
                     end_sch = new Date(formatDate(schedule.end));
                     let statusText = "";  // Use a different name for the status text variable
 
-                    if (start_sch > Date.now()) {
+                    current_date = getServerCurrentDate()
+                    if (start_sch > current_date) {
                         statusText = "waiting";
                         statusCell.style.color = "orange";
-                    } else if (start_sch < Date.now() && end_sch > Date.now()) {
+                    } else if (start_sch < current_date && end_sch > current_date) {
                         statusText = "Playing now";
                         statusCell.style.color = "green";
-                    } else if (Date.now() > end_sch) {
+                    } else if (current_date > end_sch) {
                         statusText = "Completed";
                         statusCell.style.color = "red";
                     }
@@ -1024,6 +903,21 @@ function hideAllForms() {
         form.style.display = 'none';
     });
 }
+async function getServerCurrentDate(formatted = false) {
+    try {
+        const response = await fetch('/date');
+        const serverDate = await response.text();
+
+        if (formatted) {
+            return formatDate(serverDate);
+        }
+        return serverDate;
+    } catch (error) {
+        console.error('Error fetching server date:', error);
+        throw error; // Re-throw the error if needed
+    }
+}
+
 function formatDate(dateString) {
     // Check if the dateString is null or invalid
     if (dateString === null || isNaN(new Date(dateString))) {
