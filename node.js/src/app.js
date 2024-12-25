@@ -60,6 +60,13 @@ app.use(routDeviceTemp);
 app.use(routLogin);
 app.use(routMedia);
 
+//routes ------------------------------------------------------------------------------------------------------------
+app.get('/date', (req, res) => {
+    const currentDateTime = new Date(Date.now());
+    res.send(currentDateTime.toString());
+});
+
+
 //root route
 app.get('', (req, res) => {
     verify_login(req, (result) => {
