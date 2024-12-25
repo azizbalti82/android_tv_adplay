@@ -119,13 +119,12 @@ const verify_media_exists = async (req, res) => {
 
         const bucket = getBucket();
 
-        // Allow disk use for sorting
-        const files = await bucket.find({ filename: adId }, { allowDiskUse: true }).toArray();
+        // Query with a limit and allowDiskUse
+        const files = await bucket.find({ filename: adId }, { limit: 1, allowDiskUse: true }).toArray();
         if (files.length === 0) {
             return res.status(404).json({ message: 'File not found in GridFS' });
         }
 
-        // Try to read the file
         const readStream = bucket.openDownloadStreamByName(adId);
         readStream.on('data', () => {}); // Validate stream reads
         readStream.on('error', (err) => {
