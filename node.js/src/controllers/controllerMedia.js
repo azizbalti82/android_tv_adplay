@@ -40,31 +40,6 @@ const upload_media = async (req, res) => {
     }
 };
 
-// Get media
-const get_media = async (req, res) => {
-    const { adId } = req.params;
-
-    if (!adId) return res.status(400).json({ message: 'Ad ID is required' });
-
-    try {
-        const media = await Media.findOne({ id: adId });
-        if (!media) return res.status(404).json({ message: 'Media not found' });
-
-        const bucket = getBucket();
-        const downloadStream = bucket.openDownloadStreamByName(adId);
-
-        downloadStream.pipe(res);
-
-        downloadStream.on('error', (err) => {
-            console.error('Error reading file from GridFS:', err);
-            res.status(404).json({ message: 'File not found in GridFS' });
-        });
-    } catch (err) {
-        console.error('Error in get_media:', err);
-        res.status(500).json({ message: 'Server error' });
-    }
-};
-
 const delete_media = async (req, res) => {
     const { adId } = req.params;
 
@@ -96,7 +71,34 @@ const delete_media = async (req, res) => {
     }
 };
 
+// Get media
+const get_media = async (req, res) => {
+    const { adId } = req.params;
+
+    if (!adId) return res.status(400).json({ message: 'Ad ID is required' });
+
+    try {
+        const media = await Media.findOne({ id: adId });
+        if (!media) return res.status(404).json({ message: 'Media not found' });
+
+        const bucket = getBucket();
+        const downloadStream = bucket.openDownloadStreamByName(adId);
+
+        downloadStream.pipe(res);
+
+        downloadStream.on('error', (err) => {
+            console.error('Error reading file from GridFS:', err);
+            res.status(404).json({ message: 'File not found in GridFS' });
+        });
+    } catch (err) {
+        console.error('Error in get_media:', err);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
+
 // Verify if media exists
+/*
 const verify_media_exists = async (req, res) => {
     const { adId } = req.params;
 
@@ -121,5 +123,39 @@ const verify_media_exists = async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 };
+*/
+const verify_media_exists = async (req, res) => {
+    const { adId } = req.params;
+
+    if (!adId) return res.status(400).json({ message: 'Ad ID is required' });
+
+    try {
+        const media = await Media.findOne({ id: adId });
+        if (!media) return res.status(404).json({ message: 'Media not found' });
+
+        const bucket = getBucket();
+
+        const files = await bucket.find({ filename: adId }).toArray();
+        if (files.length === 0) {
+            return res.status(404).json({ message: 'File not found in GridFS' });
+        }
+
+        // Attempt to open a read stream to validate file data
+        const readStream = bucket.openDownloadStreamByName(adId);
+        readStream.on('data', () => {}); // Validate stream reads
+        readStream.on('error', (err) => {
+            console.error('File data validation failed:', err);
+            return res.status(500).json({ message: 'File data is corrupted or unreadable' });
+        });
+
+        readStream.on('end', () => {
+            res.status(200).json({ message: 'File exists and is readable in GridFS' });
+        });
+    } catch (err) {
+        console.error('Error in verify_media_exists:', err);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
 
 module.exports = { upload_media, get_media, delete_media, verify_media_exists };
