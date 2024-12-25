@@ -7,7 +7,11 @@ function getCurrentDateTime() {
 }
 
 function convertToMillis(date) {
-    return new Date(date).getTime();
+    // Parse the date string in Tunisia's timezone
+    const tunisiaDate = moment.tz(date, 'Africa/Tunis');
+
+    // Return the time in milliseconds
+    return tunisiaDate.valueOf();
 }
 
 
