@@ -1,8 +1,7 @@
 function getCurrentDateTime() {
     const now = new Date();
 
-    // Add 1 hour to the current time
-    now.setHours(now.getHours() + 1);
+    now.setHours(now.getHours());
 
     // Get the current date in YYYY-MM-DD format
     const date = now.toISOString().split('T')[0];
