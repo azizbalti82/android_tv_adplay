@@ -16,7 +16,7 @@ function getCurrentDateTime() {
     hours = hours % 12 || 12; // Convert to 12-hour format, treating 0 as 12
 
     // Combine the date and formatted time
-    return `${date} ${hours}:${minutes} ${ampm}`;
+    return Date.now ;
 }
 
 
