@@ -8,6 +8,7 @@ const create_schedule = async (req, res) => {
         // Generate a unique ID
         const generatedID = await generateScheduleId();
         
+        console.log("start schedule text: " + req.body.start);
         // Convert the start and end to milliseconds
         const startMillis = convertToMillis(req.body.start);
         const endMillis = convertToMillis(req.body.end);

@@ -190,7 +190,6 @@ async function fetchAds(section) {
         console.error('Error fetching data:', error);
     }
 }
-
 async function fetchSchedules() {
     const tableBody = document.querySelector('#scheduleTable tbody');
     let count_fetched = 0;
