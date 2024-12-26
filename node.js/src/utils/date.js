@@ -14,8 +14,6 @@ function convertToMillis(date) {
     return tunisiaDate.valueOf();
 }
 
-
-
 module.exports = {
     getCurrentDateTime,
     convertToMillis

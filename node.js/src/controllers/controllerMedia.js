@@ -2,10 +2,10 @@ const mongoose = require('mongoose');
 const { GridFSBucket } = require('mongodb');
 const Media = require('../models/modelMedia');
 
-// Initialize GridFSBucket with options
+// Initialize GridFSBucket
 const getBucket = () => new GridFSBucket(mongoose.connection.db, { 
     bucketName: 'uploads',
-    chunkSizeBytes: 255000  // Optimize chunk size
+    chunkSizeBytes: 255000
 });
 
 // Upload media
@@ -44,7 +44,7 @@ const upload_media = async (req, res) => {
     }
 };
 
-// Get media with streaming optimization
+// Get media
 const get_media = async (req, res) => {
     const { adId } = req.params;
 
@@ -55,8 +55,6 @@ const get_media = async (req, res) => {
         if (!media) return res.status(404).json({ message: 'Media not found' });
 
         const bucket = getBucket();
-        
-        // Use cursor for efficient querying
         const cursor = bucket.find({ filename: adId }).limit(1);
         const files = await cursor.toArray();
         
@@ -65,10 +63,11 @@ const get_media = async (req, res) => {
         }
 
         const downloadStream = bucket.openDownloadStreamByName(adId);
-        
-        // Set appropriate headers
+
+        // Set headers for video playback
         res.set('Content-Type', files[0].contentType);
         res.set('Content-Length', files[0].length);
+        res.set('Content-Disposition', `inline; filename="${adId}"`);
         
         downloadStream.pipe(res);
 
@@ -78,6 +77,10 @@ const get_media = async (req, res) => {
                 res.status(500).json({ message: 'Error streaming file' });
             }
         });
+
+        res.on('close', () => {
+            downloadStream.destroy();
+        });
     } catch (err) {
         console.error('Error in get_media:', err);
         if (!res.headersSent) {
@@ -86,7 +89,7 @@ const get_media = async (req, res) => {
     }
 };
 
-// Delete media with proper cleanup
+// Delete media
 const delete_media = async (req, res) => {
     const { adId } = req.params;
 
@@ -97,11 +100,9 @@ const delete_media = async (req, res) => {
         if (!media) return res.status(404).json({ message: 'Media not found' });
 
         const bucket = getBucket();
-        
-        // Use cursor for efficient querying
         const cursor = bucket.find({ filename: adId }).limit(1);
         const files = await cursor.toArray();
-        
+
         if (files.length === 0) {
             return res.status(404).json({ message: 'File not found in GridFS' });
         }
@@ -116,7 +117,7 @@ const delete_media = async (req, res) => {
     }
 };
 
-// Verify media exists with optimized validation
+// Verify media exists
 const verify_media_exists = async (req, res) => {
     const { adId } = req.params;
 
@@ -127,16 +128,13 @@ const verify_media_exists = async (req, res) => {
         if (!media) return res.status(404).json({ message: 'Media not found' });
 
         const bucket = getBucket();
-        
-        // Use cursor for efficient querying
         const cursor = bucket.find({ filename: adId }).limit(1);
         const files = await cursor.toArray();
-        
+
         if (files.length === 0) {
             return res.status(404).json({ message: 'File not found in GridFS' });
         }
 
-        // Just check file metadata instead of reading the stream
         res.status(200).json({ 
             message: 'File exists in GridFS',
             metadata: {
