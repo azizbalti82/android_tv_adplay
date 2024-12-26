@@ -37,7 +37,17 @@ app.use('/images', express.static(path.join(__dirname, 'views', 'images')));
 // MongoDB connection
 const MONGO_URI ='mongodb+srv://azizbalti28:6Ry6oMWorQ7noiRu@projectad.vdyro.mongodb.net/?retryWrites=true&w=majority&appName=projectAd'
 
-mongoose.connect(MONGO_URI)
+mongoose.connect(MONGO_URI,{
+    // ... other options ...
+    maxPoolSize: 50,
+    minPoolSize: 10,
+    maxTimeMS: 30000,
+    // Add these options
+    readPreference: 'primary',
+    writeConcern: {
+        w: 'majority'
+    }
+})
 .then(() => console.log('Connected to MongoDB'))
 .catch((err) => console.error('Error connecting to MongoDB:', err));
 
