@@ -40,20 +40,9 @@ const MONGO_URI ='mongodb+srv://azizbalti28:6Ry6oMWorQ7noiRu@projectad.vdyro.mon
 
 
 
-mongoose.connect(MONGO_URI,{
-    maxPoolSize: 50,
-    minPoolSize: 10,
-    readPreference: 'primary',
-    writeConcern: {
-        w: 'majority'
-    }})
+mongoose.connect(MONGO_URI)
 .then(() => console.log('Connected to MongoDB'))
 .catch((err) => console.error('Error connecting to MongoDB:', err));
-
-// Add connection error handling
-mongoose.connection.on('error', err => {
-    console.error('MongoDB connection error:', err);
-});
 
 
 //functions ---------------------------------------------------------------------------------------------------------
