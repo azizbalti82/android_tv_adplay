@@ -5,10 +5,7 @@ const Media = require('../models/modelMedia');
 // Initialize GridFSBucket with options
 const getBucket = () => new GridFSBucket(mongoose.connection.db, { 
     bucketName: 'uploads',
-    chunkSizeBytes: 255000,
-    // Add these options for better sorting handling
-    readPreference: 'primary',
-    writeConcern: { w: 'majority' }
+    chunkSizeBytes: 2550000, // 2550 KB chunk size
 });
 
 // Upload media
