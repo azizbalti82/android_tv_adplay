@@ -1,5 +1,6 @@
 package com.balti.project_ads
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Matrix
 import android.net.Uri
@@ -42,6 +43,7 @@ import java.util.Collections
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
+@SuppressLint("StaticFieldLeak")
 class data {
     companion object{
         val url = "https://adplayforandroidtv-production-13eb.up.railway.app/"
@@ -53,6 +55,7 @@ class data {
         lateinit var player: ExoPlayer
         var playbackJob: Job? = null
         private val getAdsScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+
         lateinit var bindHome: ActivityMainBinding
         var refresher_started = false
         // 'ads_group' is a group of ads will be shown in order in a loop
@@ -156,22 +159,7 @@ class data {
             }
             else{
                 Log.d("media_player", "showMedia: this is a single ad: ${adItem.mediaFile?.absolutePath}")
-                // Stop and release the player if it already exists
-                if (::player.isInitialized) {
-                    player.stop()
-                    player.release()
-                }
-                // Reinitialize the Player
-                player = ExoPlayer.Builder(context).build()
-                // show the home
-                showHome()
-                // Hide all media views initially
-                bindHome.mediaAudio.cancelAnimation()
-                bindHome.mediaImage.visibility = View.GONE
-                bindHome.mediaAudio.visibility = View.GONE
-                bindHome.mediaVideo.visibility = View.GONE
-                bindHome.mediaInvalid.visibility = View.GONE
-                bindHome.noMedia.visibility = View.GONE
+                stopMedia(context)
 
                 if (adItem.mediaFile != null && adItem.type.isNotEmpty()) {
                     when (adItem.type.lowercase()) {
@@ -186,22 +174,16 @@ class data {
                         "video" -> {
                             Log.d("media_player", "(not in group) video will play ad_ID: ${adItem.mediaFile?.name}")
                             bindHome.mediaVideo.visibility = View.VISIBLE
-                            // Initialize ExoPlayer to play video from external storage
-                            // Initialize ExoPlayer
-                            val player: ExoPlayer = ExoPlayer.Builder(context).build()
                             // Apply 90-degree rotation using a Matrix
                             val textureView = bindHome.mediaVideo.videoSurfaceView as? TextureView
                             textureView?.post {
                                 val matrix = Matrix()
                                 val viewWidth = textureView.width.toFloat()
                                 val viewHeight = textureView.height.toFloat()
-
                                 // Rotate around the center
                                 matrix.postRotate(90f, viewWidth / 2, viewHeight / 2)
-
                                 // Scale to fill the PlayerView
                                 matrix.postScale(viewHeight / viewWidth, viewWidth / viewHeight, viewWidth / 2, viewHeight / 2)
-
                                 textureView.setTransform(matrix)
                             }
                             bindHome.mediaVideo.player = player
@@ -236,7 +218,6 @@ class data {
                             player.play()
                         }
                         "invalid" ->{
-                            Log.d("media_player", "(not in group) invalid will play ad_ID: ${adItem.mediaFile?.name}")
                             bindHome.mediaInvalid.visibility = View.VISIBLE
                         }
                         else -> {
@@ -252,6 +233,24 @@ class data {
                 }
             }
         }
+        fun stopMedia(c:Context) {
+            // Stop and release the player if it already exists
+            if (::player.isInitialized) {
+                player.stop()
+                player.release()
+            }
+            // Reinitialize the Player
+            player = ExoPlayer.Builder(c).build()
+            // show the home
+            showHome()
+            // Hide all media views initially
+            bindHome.mediaAudio.cancelAnimation()
+            bindHome.mediaAudio.visibility = View.GONE
+            bindHome.mediaImage.visibility = View.GONE
+            bindHome.mediaVideo.visibility = View.GONE
+            bindHome.mediaInvalid.visibility = View.GONE
+            bindHome.noMedia.visibility = View.GONE
+        }
         fun playAdsSequentially(context:Context,adsGroup: List<AdItem>) {
             try{
                     // Cancel any ongoing playback
@@ -260,25 +259,7 @@ class data {
                     playbackJob =  CoroutineScope(Dispatchers.Main).launch {
                         for (ad in adsGroup) {
                             // Stop and release the player if it already exists
-                            withContext(Dispatchers.Main) {
-                                if (::player.isInitialized) {
-                                    player.stop()
-                                    player.release()
-                                }
-                            }
-
-                            // Reinitialize the Player
-                            player = ExoPlayer.Builder(context).build()
-                            // show the home
-                            showHome()
-                            // Hide all media views initially
-                            bindHome.mediaAudio.cancelAnimation()
-                            bindHome.mediaImage.visibility = View.GONE
-                            bindHome.mediaAudio.visibility = View.GONE
-                            bindHome.mediaVideo.visibility = View.GONE
-                            bindHome.mediaInvalid.visibility = View.GONE
-                            bindHome.noMedia.visibility = View.GONE
-
+                            stopMedia(context)
                             when (ad.type.lowercase()) {
                                 "image" -> {
                                     Log.d("media_player", "(in group) image will play ad_ID: ${ad.mediaFile?.name}")
@@ -294,7 +275,6 @@ class data {
                                 "video" -> {
                                     Log.d("media_player", "(in group) video will play ad_ID: ${ad.mediaFile?.name}")
                                     bindHome.mediaVideo.visibility = View.VISIBLE
-                                    player = ExoPlayer.Builder(context).build()
                                     bindHome.mediaVideo.player = player
                                     bindHome.mediaVideo.useController = false
 
@@ -325,7 +305,6 @@ class data {
                                     bindHome.mediaAudio.visibility = View.VISIBLE
                                     bindHome.mediaAudio.playAnimation()
 
-                                    player = ExoPlayer.Builder(context).build()
                                     val mediaItem = MediaItem.fromUri(Uri.fromFile(ad.mediaFile))
                                     val dataSourceFactory = DefaultDataSourceFactory(context, Util.getUserAgent(context, "exo"))
                                     val mediaSource = ProgressiveMediaSource.Factory(dataSourceFactory).createMediaSource(mediaItem)
@@ -377,19 +356,14 @@ class data {
             try {
                 //show loading screen
                 show_loading()
-                // Stop and release the player if it already exists
-                if (::player.isInitialized) {
-                    player.stop()
-                    player.release()
-                }
-                // Cancel any ongoing playback
-                playbackJob?.cancel()
-
+                stopMedia(c)
 
                 Toast.makeText(c, "Refreshing...", Toast.LENGTH_SHORT).show()
                 Log.d(TAG, "getSchdules: started getting schedules for deviceID: $deviceId")
                 ads_group.clear() //clear the ads group
 
+                showMedia(c, adItem = AdItem("", "","", null, 0, 0, 0, false))
+                // Get schedules from the server
                 apiCalls.getSchedulesByDeviceId(deviceId) { schedules ->
                     if (schedules != null) {
                         // we got schedules
@@ -397,7 +371,7 @@ class data {
                             Log.d(TAG, "getSchdules: there is no schedules")
                             showMedia(c, adItem = AdItem("", "","", null, 0, 0, 0, false))
                         } else {
-                            Log.d(TAG, "getSchdules: there is schedules, lets save them")
+                            Log.d(TAG, "getSchedules: there is schedules, lets save them")
                             //there are some schedules:
                             //1) schedule them
                             for (s in schedules) {
@@ -406,7 +380,7 @@ class data {
                                     val inGroup = s.ad_id!!.contains(";")
                                     Log.d(
                                         TAG,
-                                        "getSchdules: total of ads in this schedule: ${ids.size}:ids: $ids"
+                                        "getSchedules: total of ads in this schedule: ${ids.size}:ids: $ids"
                                     )
 
                                     //2) save media in the storage (if that ads media not already saved)
@@ -511,7 +485,8 @@ class data {
                                             return@launch
                                         }
                                     }
-                                } else {
+                                }
+                                else {
                                     Log.d(TAG, "getSchdules: schedule is null")
                                 }
                             }
