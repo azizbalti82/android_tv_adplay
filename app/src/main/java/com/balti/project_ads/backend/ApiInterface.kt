@@ -39,4 +39,8 @@ interface ApiInterface {
     // get one ad by its id
     @GET("/ads/{adId}")
     fun getAd(@Path("adId") adId: String): Call<Ad>
+
+    // get current date of server
+    @GET("/date")
+    fun getDate(): Call<Long?>
 }

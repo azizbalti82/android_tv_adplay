@@ -21,6 +21,26 @@ class ApiCalls {
         .build()
     private val api = retrofit.create(ApiInterface::class.java)
 
+
+    fun getDate(callback: (Long?) -> Unit) {
+        val call = api.getDate()
+        call.enqueue(object : Callback<Long?> {
+            override fun onResponse(p0: Call<Long?>, response: Response<Long?>) {
+                if (response.isSuccessful) {
+                    Log.d(TAG, "getDate: server date fetched successfully: ${response.body()}")
+                    callback(response.body())
+                } else {
+                    Log.e(TAG, "getDate: Failed to get current server date: ${response.message()}")
+                    callback(null)
+                }
+            }
+
+            override fun onFailure(p0: Call<Long?>, p1: Throwable) {
+                Log.e(TAG, "getDate: Failed to get current server date: ${p1}")
+                callback(null)
+            }
+        })
+    }
     // CRUD operations for devices temp ------------------------------------------------------------
     fun createTempDevice(callback: (DeviceTemp_content?) -> Unit) {
         val call = api.createTempDevice()
@@ -52,7 +72,7 @@ class ApiCalls {
                     Log.d(TAG, "getTempDevice: Device fetched successfully")
                     callback(response.body())
                 } else {
-                    Log.e(TAG, "getTempDevice: Failed to fetch device: ${response.message()}")
+                    Log.e(TAG, "getTempDevice: Failed to fetch device:kk ${response.message()}")
                     callback(null)
                 }
             }

@@ -1,6 +1,5 @@
 package com.balti.project_ads.backend
 import java.io.File
-import java.util.Date
 
 
 //for device temp
@@ -12,7 +11,7 @@ data class DeviceTemp_content(
     val id: String,
     val _id: String,
     val status: String,
-    val createdAt: String,
+    val createdAt: Long,
     val __v: Int
 )
 
@@ -26,14 +25,15 @@ data class device_content(
     val id: String,
     val name: String,
     var status: String = "offline",
-    val createdAt: Date = Date(),
-    val lastSeen: Date = Date(),
+    val createdAt: Long,
+    val lastSeen: Long,
     val __v:String
 )
 
 //status (use it to update status of device)
 data class Status(
-    val status: String
+    val status: String,
+    val lastSeen: Long
 )
 
 //for schedule
@@ -41,8 +41,8 @@ class Schedule {
     var id: String? = null
     var ad_id: String? = null
     var device_id: String? = null
-    var start: Date? = null
-    var end: Date? = null
+    var start: Long? = null
+    var end: Long? = null
     var orientation: String? = null
     var status: String? = null
 }
@@ -60,14 +60,20 @@ data class ad_content(
     val type: String? = null,  // Corresponds to "ad.type"
     val mediaUrl: String? = null,  // Corresponds to "ad.mediaUrl"
     val mediaExtension: String? = null,  // Corresponds to "ad.mediaExtension"
-    val createdAt: String? = null,  // Corresponds to "ad.createdAt"
-    val updatedAt: String? = null,  // Corresponds to "ad.updatedAt"
+    val createdAt: Long? = null,  // Corresponds to "ad.createdAt"
+    val updatedAt: Long? = null,  // Corresponds to "ad.updatedAt"
     val v: Int? = null  // Corresponds to "ad.__v"
 )
 
 
-data class AdGroupItem(
+data class AdItem(
+    var id:String,
+    var scheduleId:String,
     var type: String,
     var mediaFile: File?,
+    var start: Long,
+    var end: Long,
+    var position:Int,
+    var inGroup:Boolean,
 )
 

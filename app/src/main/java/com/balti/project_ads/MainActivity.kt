@@ -8,6 +8,8 @@ import android.view.View
 import androidx.fragment.app.FragmentActivity
 import com.balti.project_ads.backend.ApiCalls
 import com.balti.project_ads.backend.Status
+import com.balti.project_ads.data.Companion.playbackJob
+import com.balti.project_ads.data.Companion.player
 import com.balti.project_ads.databinding.ActivityMainBinding
 import com.balti.project_ads.storage.shared
 
@@ -95,14 +97,15 @@ class MainActivity : FragmentActivity() {
         //update connectivity status to online
         setConnectivity(true)
 
-        //setup a worker to fetch schedules for every 12h
-        FetchSchedulesWorker(this)
-
         //show empty ads until the a new schedule fetching occurs
         data.getSchdules(this,data.deviceId)
 
         //device is connected so open the 'home' section
         setSection("home")
+
+        if(!data.refresher_started){
+            data.scheduleRefresh(this)
+        }
     }
     private fun setSection(sectionName: String) {
         // Reset visibility for all sections
@@ -114,6 +117,16 @@ class MainActivity : FragmentActivity() {
         Log.d(TAG, "setSection: you are trying to show section '$sectionName'")
         when (sectionName) {
             "offline" -> {
+                // Stop and release the player if it already exists
+                try{
+                    // Cancel any ongoing playback
+                    playbackJob?.cancel()
+                    player.stop()
+                    player.release()
+                }catch (e:Exception){
+                }
+
+
                 bindHome.containerOffline.visibility = View.VISIBLE
                 bindHome.timer.text = "10"
                 // Create a 10-second timer
@@ -180,13 +193,15 @@ class MainActivity : FragmentActivity() {
         //update device in server
         if(data.deviceId.isNotEmpty()){
             data.deviceId.let { id->
-                val device = Status(status = if(connected) "online" else "offline")
-                data.apiCalls.updateDevice(id,device) { isUpdated ->
-                    if (isUpdated) {
-                        // Device update successful
-                        Log.d("server_messages","device status updated")
-                    }else {
-                        Log.d("server_messages","error while updating status")
+                data.current_date { date->
+                    val device = Status(status = if(connected) "online" else "offline",date)
+                    data.apiCalls.updateDevice(id,device) { isUpdated ->
+                        if (isUpdated) {
+                            // Device update successful
+                            Log.d("server_messages","device status updated")
+                        }else {
+                            Log.d("server_messages","error while updating status")
+                        }
                     }
                 }
             }
@@ -194,10 +209,6 @@ class MainActivity : FragmentActivity() {
     }
 
     // functionality ---------------------------------------------
-    private fun FetchSchedulesWorker(context: Context) {
-        //fetch schedules every 15mn
-
-    }
     private fun rotateScreen() {
         val root: View = bindHome.root
         // Get screen dimensions
